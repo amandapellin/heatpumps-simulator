@@ -1,0 +1,53 @@
+/* Botão de fechar flutuante */
+.modal-content {
+    position: relative;
+}
+
+.modal-content .btn-close {
+    position: sticky !important;
+    top: 1rem;
+    background-color: white;
+    border-radius: 50%;
+    padding: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0.8;
+    transition: all 0.2s ease;
+}
+
+.modal-content .btn-close:hover {
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transform: scale(1.1);
+}
+
+/* Ajuste do modal dialog */
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* Header do modal */
+.modal-header {
+    padding: 1.5rem 3rem 1rem 3rem;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .modal-header {
+        padding: 1rem 2.5rem 0.5rem 1rem;
+    }
+    
+    .modal-title {
+        font-size: 1.1rem !important;
+    }
+    
+    .modal-content .btn-close {
+        top: 0.5rem;
+        padding: 0.5rem;
+    }
+}
