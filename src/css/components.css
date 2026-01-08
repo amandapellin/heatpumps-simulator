@@ -1,53 +1,130 @@
-/* Botão de fechar flutuante */
-.modal-content {
+:root {
+  --verde-escuro: #00353b;
+  --elements-webflow-library--neutral--300: #eff0f6;
+  --bege: #faf3e9;
+  --verde-titulos: #00343a;
+  --elements-webflow-library--neutral--100: white;
+  --elements-webflow-library--accent--primary-1: #afe327;
+  --elements-webflow-library--general--shadow-02: #14142b14;
+  --elements-webflow-library--neutral--600: #6e7191;
+  --elements-webflow-library--neutral--800: #211f54;
+  --blue-clean: #1f7eff;
+  --green-triplob: #afe327;
+  --blue-triplo-b: #086aef;
+  --orange-triplob: #ffb900;
+  --elements-webflow-library--general--shadow-01: #14142b0f;
+  --elements-webflow-library--general--shadow-03: #14142b1a;
+  --elements-webflow-library--secondary--color-1: #281ca5;
+}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    background: var(--bege);
+}
+.eco-simulator * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.eco-simulator {
+    font-family: 'Host Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+}
+
+.eco-logo{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 1rem 0;
+}
+.eco-logo img{
+  display: block;
+  margin: 0 auto;
+  height: 50px;
+  background: transparent;
+}
+.eco-logo p{
+    display: block;
+    color: var(--bege);
+    font-size: 1.2rem;
+    background: transparent;
+    text-align: center;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+.eco-card {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--elements-webflow-library--neutral--100);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--elements-webflow-library--general--shadow-03);
+    overflow: hidden;
+    margin-top: 8rem;
+}
+.eco-header {
+    color: var(--verde-escuro);
+    padding: 2rem;
+    text-align: center;
+}
+.eco-stepper {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+    gap: 1rem;
+}
+.eco-step {
+    flex: 1;
+    text-align: center;
     position: relative;
 }
-
-.modal-content .btn-close {
-    position: sticky !important;
-    top: 1rem;
-    background-color: white;
+.eco-step-circle {
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    padding: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    opacity: 0.8;
-    transition: all 0.2s ease;
+    background: var(--bege);
+    border: 2px solid var(--verde-escuro);
+    color: var(--verde-titulos);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
 }
-
-.modal-content .btn-close:hover {
-    opacity: 1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+.eco-step.eco-active .eco-step-circle {
+    background: var(--verde-escuro);
+    color: var(--bege);
     transform: scale(1.1);
 }
-
-/* Ajuste do modal dialog */
-.modal-dialog-scrollable .modal-body {
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
+.eco-step.eco-completed .eco-step-circle {
+    background: var(--green-triplob);
+    border-color: var(--green-triplob);
+    color: var(--bege);
 }
-
-/* Header do modal */
-.modal-header {
-    padding: 1.5rem 3rem 1rem 3rem;
+.eco-step-label {
+    font-size: 0.9rem;
+    color: var(--verde-titulos);
+    font-weight: 500;
 }
-
-.modal-title {
-    font-weight: 600;
-    color: #333;
+.eco-step-line {
+    position: absolute;
+    top: 20px;
+    left: calc(50% + 20px);
+    right: calc(-50% - 20px);
+    height: 2px;
+    background: var(--elements-webflow-library--neutral--600);
+    z-index: 1;
 }
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .modal-header {
-        padding: 1rem 2.5rem 0.5rem 1rem;
-    }
-    
-    .modal-title {
-        font-size: 1.1rem !important;
-    }
-    
-    .modal-content .btn-close {
-        top: 0.5rem;
-        padding: 0.5rem;
-    }
+.eco-step:last-child .eco-step-line {
+    display: none;
+}
+.eco-step.eco-completed .eco-step-line {
+    background: var(--green-triplob);
 }
