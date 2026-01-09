@@ -3,7 +3,7 @@ export class Stepper {
         this.container = container;
         this.currentStep = 1;
         this.steps = [
-            { number: 1, title: "Localização" },
+            { number: 1, title: "Dados do Local" },
             { number: 2, title: "Dados da Piscina" },
             { number: 3, title: "Resultados" }
         ]
