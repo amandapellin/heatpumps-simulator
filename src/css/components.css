@@ -22,6 +22,10 @@
     padding: 0;
     background: var(--bege);
 }
+body {
+    margin: 0;
+    padding: 0;
+}
 .eco-simulator * {
     margin: 0;
     padding: 0;
@@ -30,23 +34,20 @@
 .eco-simulator {
     font-family: 'Host Grotesk', sans-serif;
     min-height: 100vh;
-    padding: 2rem 1rem;
 }
 
 .eco-logo{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 1rem 0;
+    width: 100%;
+    margin: 0;
+    background-color: rgba(0, 53, 59, 0.75);
+    padding: 1rem 0;
 }
 .eco-logo img{
   display: block;
   margin: 0 auto;
   height: 50px;
   background: transparent;
+  margin-bottom: 1rem;
 }
 .eco-logo p{
     display: block;
@@ -64,7 +65,7 @@
     border-radius: 12px;
     box-shadow: 0 4px 20px var(--elements-webflow-library--general--shadow-03);
     overflow: hidden;
-    margin-top: 8rem;
+    margin-top: 3rem;
 }
 .eco-header {
     color: var(--verde-escuro);
@@ -87,7 +88,7 @@
     height: 40px;
     border-radius: 50%;
     background: var(--bege);
-    border: 2px solid var(--verde-escuro);
+    border: 3px solid var(--verde-escuro);
     color: var(--verde-titulos);
     display: flex;
     align-items: center;
@@ -118,8 +119,8 @@
     top: 20px;
     left: calc(50% + 20px);
     right: calc(-50% - 20px);
-    height: 2px;
-    background: var(--elements-webflow-library--neutral--600);
+    height: 3px;
+    background: var(--verde-escuro);
     z-index: 1;
 }
 .eco-step:last-child .eco-step-line {
