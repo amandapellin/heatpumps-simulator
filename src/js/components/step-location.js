@@ -39,24 +39,35 @@ export class StepLocation {
     
     render() {
         return `
-            <div class="eco-step-content eco-active" data-step="1">
-                <h2>Dados do Local</h2>
-                <div class="eco-form-row">
-                    <div class="eco-form-group">
-                        <label class="eco-label" for="state">Estado</label>
-                        <select class="eco-select" id="state" name="state">
-                            <option value="">Selecione o estado</option>
-                        </select>
+            <div class="eco-location-container">
+                <div class="eco-location-card">
+                    <div class="eco-location-header">
+                        <div class="eco-location-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin">
+                                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <h2 class="eco-location-title">Localização da Piscina</h2>
+                        <p class="eco-location-subtitle">Informe o estado e a cidade onde sua piscina está localizada para calcularmos as condições climáticas ideais.</p>
                     </div>
-                    <div class="eco-form-group">
-                        <label class="eco-label" for="city">Cidade</label>
-                        <select class="eco-select" id="city" name="city" disabled>
-                            <option value="">Selecione a cidade</option>
-                        </select>
+                    <div class="eco-location-form">
+                        <div class="eco-form-group">
+                            <label class="eco-label" for="state">Estado</label>
+                            <select class="eco-select" id="state" name="state">
+                                <option value="">Selecione o estado</option>
+                            </select>
+                        </div>
+                        <div class="eco-form-group">
+                            <label class="eco-label" for="city">Cidade</label>
+                            <select class="eco-select" id="city" name="city" disabled>
+                                <option value="">Selecione a cidade</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="eco-step-actions">
-                    <button class="eco-btn eco-btn-primary" id="btnNextLocation">Próximo</button>
+                    <div class="eco-step-actions">
+                        <button class="eco-btn eco-btn-primary" id="btnNextLocation">Próximo</button>
+                    </div>
                 </div>
             </div>
         `
