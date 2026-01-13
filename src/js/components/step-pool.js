@@ -1,104 +1,325 @@
 export class StepPool {
-	constructor() {
+	constructor(apiService, locationData) {
+		this.apiService = apiService
+		this.locationData = locationData
+		this.areas = []
+		this.areaCounter = 0
 		this.data = {
-		length: "",
-		width: "",
-		depth: "",
-		hasHeating: false,
+			areas: [],
+			tanqueCompensacao: 'nao',
+			tipoUtilizacao: 'residencial',
+			utilizacaoAnual: 'ano_inteiro',
+            utilizacaoMensal: 'finais_de_semana',
+            localizacaoPiscina: 'externa',
+            utilizacaoCapaTermica: 'nao',
+            velocidadeVento: 'medio',
+            reabastecimentoDiario: 0,
+            temperaturaDesejada: 32,
+            temperaturaInicial: 20,
+            comprimentoBordaInfinita: 0,
+            larguraCascata: 0,
+            dispositivoHidromassagem: 0
 		};
   	}
-
-	render() {
-		return `
-			<div class="eco-pool-container">
-				<div class="eco-pool-card">
-					<div class="eco-pool-header">
-						<div class="eco-pool-icon">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-waves-ladder-icon lucide-waves-ladder">
-							<path d="M19 5a2 2 0 0 0-2 2v11"/>
-							<path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-							<path d="M7 13h10"/>
-							<path d="M7 9h10"/>
-							<path d="M9 5a2 2 0 0 0-2 2v11"/>
-						</svg>
-						</div>
-						<h2 class="eco-pool-title">Dados da Piscina</h2>
-						<p class="eco-pool-subtitle">Forneça as informações detalhadas sobre sua piscina para um cálculo preciso.</p>
-					</div>
-					<div class="eco-pool-form">
-						<p class="eco-pool-info-text">Áreas com menos de 0.6 metros de profundidade serão consideradas prainhas.</p>
-						<button class="eco-btn eco-btn-secondary" id="btnAddArea"> Adicionar Área </button>
-						
-						<div class="eco-form-group">
-							<label for="poolLength">Comprimento (m)</label>
-							<input type="number" id="poolLength" class="eco-input" placeholder="Ex: 8" step="0.1">
-						</div>
-						<div class="eco-form-group">
-							<label for="poolWidth">Largura (m)</label>
-							<input type="number" id="poolWidth" class="eco-input" placeholder="Ex: 4" step="0.1">
-						</div>
-						<div class="eco-form-group">
-							<label for="poolDepth">Profundidade média (m)</label>
-							<input type="number" id="poolDepth" class="eco-input" placeholder="Ex: 1.5" step="0.1">
-						</div>
-						<div class="eco-form-group">
-							<label>
-								<input type="checkbox" id="poolHeating">
-								A piscina possui aquecimento?
-							</label>
-						</div>
-						<div class="eco-actions">
-							<button class="eco-btn eco-btn-secondary" id="btnBackPool">
-								Voltar
-							</button>
-							<button class="eco-btn eco-btn-primary" id="btnNextPool">
-								Calcular
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		`;
+	async loadClimateData() {
+		try {
+			console.log('Location Data recebido:', this.locationData)
+			console.log('Buscando clima para state_city:', this.locationData.state_city)
+			
+			this.climateData = await this.apiService.getClimateData(this.locationData.state_city)
+			console.log('Dados climáticos:', this.climateData)
+		
+			const tempInfo = document.querySelector('#tempInfo')
+			if (tempInfo && this.climateData.temp_minima) {
+				tempInfo.textContent = `Temperatura Ambiente média mais baixa do ano ${this.climateData.temp_minima}°C.`
+			}
+		} catch (error) {
+			console.error('Erro ao carregar dados climáticos:', error)
+			const tempInfo = document.querySelector('#tempInfo')
+			if (tempInfo) {
+				tempInfo.textContent = 'Não foi possível carregar a temperatura da região'
+			}
+		}
 	}
+    addArea() {
+        const areaId = ++this.areaCounter
+        this.areas.push({
+            id: areaId,
+            comprimento: '',
+            largura: '',
+            profundidade: ''
+        })
+        this.renderAreas()
+    }
 
-  bindEvents(onNext, onBack) {
-	const btnNext = document.querySelector("#btnNextPool");
-	const btnBack = document.querySelector("#btnBackPool");
-	const lengthInput = document.querySelector("#poolLength");
-	const widthInput = document.querySelector("#poolWidth");
-	const depthInput = document.querySelector("#poolDepth");
-	const heatingCheck = document.querySelector("#poolHeating");
+    removeArea(areaId) {
+        this.areas = this.areas.filter(area => area.id !== areaId)
+        this.renderAreas()
+    }
 
-	lengthInput?.addEventListener("input", (e) => {
-	  this.data.length = e.target.value;
-	});
+    renderAreas() {
+        const container = document.querySelector('#poolAreasContainer')
+        if (!container) return
 
-	widthInput?.addEventListener("input", (e) => {
-	  this.data.width = e.target.value;
-	});
+        container.innerHTML = this.areas.map(area => `
+            <div class="eco-area-card" data-area-id="${area.id}">
+                <div class="eco-area-header">
+                    <h3>Área ${area.id}</h3>
+                    <button type="button" class="eco-btn-remove" data-area-id="${area.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash">
+							<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+							<path d="M3 6h18"/>
+							<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+						</svg>
+                    </button>
+                </div>
+                <div class="eco-area-fields">
+                    <div class="eco-form-group">
+                        <label class="eco-label" >Comprimento (m)</label>
+                        <input type="number" class="eco-input" data-field="comprimento" data-area-id="${area.id}" 
+                            value="${area.comprimento}" placeholder="Ex: 8" step="0.1" min="0">
+                    </div>
+                    <div class="eco-form-group">
+                        <label class="eco-label">Largura (m)</label>
+                        <input type="number" class="eco-input" data-field="largura" data-area-id="${area.id}" 
+                            value="${area.largura}" placeholder="Ex: 4" step="0.1" min="0">
+                    </div>
+                    <div class="eco-form-group">
+                        <label class="eco-label">Profundidade (m)</label>
+                        <input type="number" class="eco-input" data-field="profundidade" data-area-id="${area.id}" 
+                            value="${area.profundidade}" placeholder="Ex: 1.5" step="0.1" min="0">
+                    </div>
+                </div>
+            </div>
+        `).join('')
 
-	depthInput?.addEventListener("input", (e) => {
-	  this.data.depth = e.target.value;
-	});
+        this.bindAreaEvents()
+    }
+    bindAreaEvents() {
+        document.querySelectorAll('.eco-btn-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const areaId = parseInt(e.currentTarget.dataset.areaId)
+                this.removeArea(areaId)
+            })
+        })
 
-	heatingCheck?.addEventListener("change", (e) => {
-	  this.data.hasHeating = e.target.checked;
-	});
+        document.querySelectorAll('[data-area-id][data-field]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const areaId = parseInt(e.target.dataset.areaId)
+                const field = e.target.dataset.field
+                const area = this.areas.find(a => a.id === areaId)
+                if (area) {
+                    area[field] = e.target.value
+                }
+            })
+        })
+    }
 
-	btnBack?.addEventListener("click", () => {
-	  onBack();
-	});
+    render() {
+        return `
+            <div class="eco-container">
+                <div class="eco-card">
+                    <div class="eco-header">
+                        <div class="eco-card-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 5a2 2 0 0 0-2 2v11"/>
+                                <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                                <path d="M7 13h10"/>
+                                <path d="M7 9h10"/>
+                                <path d="M9 5a2 2 0 0 0-2 2v11"/>
+                            </svg>
+                        </div>
+                        <h2 class="eco-card-title">Dados da Piscina</h2>
+                        <p class="eco-card-subtitle">Forneça as informações detalhadas sobre sua piscina para um cálculo preciso.</p>
+                    </div>
+                    <div class="eco-pool-body">
+						<div class="eco-pool-area">
+							<div class="eco-pool-info">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info">
+									<circle cx="12" cy="12" r="10"/>
+									<path d="M12 16v-4"/>
+									<path d="M12 8h.01"/>
+								</svg>
+								<p class="eco-pool-info-text">Áreas com menos de 0.6 metros de profundidade serão consideradas prainhas.</p>
+							</div>
+								<button type="button" class="eco-btn eco-btn-secondary eco-btn-small" id="btnAddArea">+ Adicionar Área</button>
+							<div id="poolAreasContainer"></div>
+						</div>
 
-	btnNext?.addEventListener("click", () => {
-	  if (this.data.length && this.data.width && this.data.depth) {
-		onNext(this.data);
-	  } else {
-		alert("Por favor, preencha todas as dimensões da piscina");
-	  }
-	});
-  }
+                        <div class="eco-separator"></div>
+						<div class="eco-pool-info">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thermometer-sun-icon lucide-thermometer-sun">
+								<path d="M12 2v2"/>
+								<path d="M12 8a4 4 0 0 0-1.645 7.647"/>
+								<path d="M2 12h2"/>
+								<path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>
+								<path d="m4.93 4.93 1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/>
+							</svg>
+							<p class="eco-pool-info-text" id="tempInfo"></p>
+						</div>
+						<div class="eco-pool-parameters">
+							<div class="eco-form-group">
+								<label class="eco-label" for="tanqueCompensacao">Tanque de Compensação</label>
+								<select id="tanqueCompensacao" class="eco-select">
+									<option value="nao">Não</option>
+									<option value="sim">Sim</option>
+								</select>
+							</div>
 
-  getData() {
-	return this.data;
-  }
+							<div class="eco-form-group">
+								<label class="eco-label" for="tipoUtilizacao">Tipo de Utilização</label>
+								<select id="tipoUtilizacao" class="eco-select">
+									<option value="residencial">Residencial</option>
+									<option value="comercial">Comercial</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="utilizacaoAnual">Utilização Anual</label>
+								<select id="utilizacaoAnual" class="eco-select">
+									<option value="ano_inteiro">Ano Inteiro</option>
+									<option value="verao">Apenas Verão</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="utilizacaoMensal">Utilização Mensal</label>
+								<select id="utilizacaoMensal" class="eco-select">
+									<option value="finais_de_semana" selected>Finais de Semana</option>
+									<option value="todos_os_dias">Todos os Dias</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="localizacaoPiscina">Localização da Piscina</label>
+								<select id="localizacaoPiscina" class="eco-select">
+									<option value="externa">Externa</option>
+									<option value="interna">Interna</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="utilizacaoCapaTermica">Utiliza Capa Térmica</label>
+								<select id="utilizacaoCapaTermica" class="eco-select">
+									<option value="nao">Não</option>
+									<option value="sim">Sim</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label"for="velocidadeVento">Velocidade do Vento</label>
+								<select id="velocidadeVento" class="eco-select">
+									<option value="sem_vento">Sem Vento</option>
+									<option value="fraco">Fraco</option>
+									<option value="medio" selected>Médio</option>
+									<option value="forte">Forte</option>
+								</select>
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label"for="reabastecimentoDiario">Reabastecimento Diário (%)*¹</label>
+								<input type="number" id="reabastecimentoDiario" class="eco-input" value="0" min="0" max="100" step="1">
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label"for="temperaturaDesejada">Temperatura Desejada (°C)</label>
+								<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" max="40" step="0.5">
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="temperaturaInicial">Temperatura Inicial (°C)</label>
+								<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="10" max="25" step="0.5">
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label"for="comprimentoBordaInfinita">Comprimento Borda Infinita (m)</label>
+								<input type="number" id="comprimentoBordaInfinita" class="eco-input" value="0" min="0" step="0.1">
+							</div>
+
+							<div class="eco-form-group">
+								<label class="eco-label" for="larguraCascata">Largura da Cascata (m)</label>
+								<input type="number" id="larguraCascata" class="eco-input" value="0" min="0" step="0.1">
+							</div>
+
+							<div class="eco-form-group eco-full">
+								<label class="eco-label" for="dispositivoHidromassagem">Dispositivos de Hidromassagem (un)</label>
+								<input type="number" id="dispositivoHidromassagem" class="eco-input" value="0" min="0" step="1">
+							</div>
+
+						</div>
+						<div class="eco-info-note">
+							<p class="eco-pool-info-text">*¹ Reabastecimento para manter o volume da piscina.</p>
+						</div>
+					</div>
+					<div class="eco-step-actions eco-step-actions-double">
+						<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">Voltar</button>
+						<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnNextPool">Calcular</button>
+					</div>
+                </div>
+            </div>
+        `
+    }
+
+  	bindEvents(onNext, onBack) {
+
+		this.loadClimateData()
+
+        const btnAddArea = document.querySelector('#btnAddArea')
+        const btnNext = document.querySelector('#btnNextPool')
+        const btnBack = document.querySelector('#btnBackPool')
+
+		btnAddArea?.addEventListener('click', () => {
+        	this.addArea()
+        })
+        const fields = [
+            'tanqueCompensacao', 'tipoUtilizacao', 'utilizacaoAnual', 'utilizacaoMensal',
+            'localizacaoPiscina', 'utilizacaoCapaTermica', 'velocidadeVento',
+            'reabastecimentoDiario', 'temperaturaDesejada', 'temperaturaInicial',
+            'comprimentoBordaInfinita', 'larguraCascata', 'dispositivoHidromassagem'
+        ]
+
+        fields.forEach(field => {
+            const input = document.querySelector(`#${field}`)
+            input?.addEventListener('change', (e) => {
+                this.data[field] = e.target.value
+            })
+        })
+
+        btnBack?.addEventListener('click', () => {
+            onBack()
+        })
+
+        btnNext?.addEventListener('click', () => {
+            if (this.areas.length === 0) {
+                alert('Por favor, adicione pelo menos uma área de piscina')
+                return
+            }
+
+            const invalidArea = this.areas.find(area => 
+                !area.comprimento || !area.largura || !area.profundidade
+            )
+
+            if (invalidArea) {
+                alert('Por favor, preencha todos os campos das áreas adicionadas')
+                return
+            }
+
+            if (parseFloat(this.data.temperaturaDesejada) <= parseFloat(this.data.temperaturaInicial)) {
+                alert('A temperatura desejada deve ser maior que a temperatura inicial')
+                return
+            }
+
+            this.data.areas = this.areas.map(area => ({
+                comprimento: parseFloat(area.comprimento),
+                largura: parseFloat(area.largura),
+                profundidade: parseFloat(area.profundidade)
+            }))
+
+            onNext(this.data)
+        })
+  	}
+
+  	getData() {
+		return this.data;
+  	}
 }

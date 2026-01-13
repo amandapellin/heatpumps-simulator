@@ -23,6 +23,7 @@
     --cinza-claro: #E0E0E0;
     --cinza-medio: #CCCCCC;
     --cinza-medio-escuro: #999999;
+    --cinza-escuro: #666666;
 }
 
 * {
@@ -51,8 +52,9 @@ body {
 .eco-logo{
     width: 100%;
     margin: 0;
-    background-color: rgba(0, 53, 59, 0.75);
+    background-color: rgba(0, 53, 59, 0.85);
     padding: 1rem 0;
+    margin-bottom: 3rem;
 }
 
 .eco-logo img{
@@ -73,39 +75,29 @@ body {
     margin-top: 1rem;
 }
 
-.eco-header {
-    color: var(--verde-escuro);
-    padding: 2rem;
-    text-align: center;
-}
-
-.eco-header h1 {
-    margin: 1rem;
-    font-size: 2.2rem;
-}
-
-.eco-location-container {
+.eco-container {
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
+    margin-bottom: 2rem;
 }
 
-.eco-location-card {
+.eco-card, .eco-card {
     background: var(--elements-webflow-library--neutral--100);
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
     overflow: hidden;
 }
 
-.eco-location-header {
+.eco-header {
     text-align: center;
     padding: 3rem 2.5rem 2rem;
-    background: linear-gradient(135deg, #00353b 0%, #004d56 100%);
+    background: rgba(0, 53, 59, 0.85);
     color: var(--bege);
     position: relative;
 }
 
-.eco-location-header::after {
+.eco-header::after {
     content: '';
     position: absolute;
     bottom: -1px;
@@ -116,7 +108,7 @@ body {
     border-radius: 1.5rem 1.5rem 0 0;
 }
 
-.eco-location-icon {
+.eco-card-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -130,7 +122,7 @@ body {
     z-index: 1;
 }
 
-.eco-location-title {
+.eco-card-title {
     font-size: 1.875rem;
     font-weight: 700;
     color: var(--bege);
@@ -140,11 +132,10 @@ body {
     z-index: 1;
 }
 
-.eco-location-subtitle {
+.eco-card-subtitle {
     font-size: 1rem;
     color: var(--bege);
     line-height: 1.6;
-    max-width: 500px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
@@ -251,7 +242,7 @@ body {
 }
 
 .eco-btn-primary {
-  background:var(--verde-escuro);
+  background:rgba(0, 53, 59, 0.85);
   color: var(--bege);
 }
 
@@ -270,8 +261,11 @@ body {
 }
 
 .eco-btn-secondary:hover:not(:disabled) {
-  background: var(--verde-escuro);
-  color: var(--bege);
+  background: rgba(175,227,39,0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 53, 59, 0.25);
+  border: none;
+  color: var(--verde-medio);
 }
 
 .eco-btn:disabled {
@@ -279,6 +273,21 @@ body {
     color: #999999;
     cursor: not-allowed;
     box-shadow: none;
+}
+
+.eco-btn-small {
+    width: fit-content;
+    padding: 0 1.25rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
+}
+
+.eco-btn-medium {
+    width: auto;
+    min-width: 180px;
+    padding: 0.75rem 1.5rem;
+    height: 3rem;
+    font-size: 1rem;
 }
 
 .eco-step-actions {
@@ -289,4 +298,90 @@ body {
     align-items: center;
     gap: 1rem;
     margin-top: 1rem;
+}
+.eco-step-actions-double {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.eco-separator {
+    height: 1px;
+    background: var(--cinza-claro);
+    margin: 1rem 0;
+}
+
+.eco-area-card {
+    background: var(--cinza-extra-claro);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+}
+
+.eco-area-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.eco-area-header h3 {
+    font-size: 1.125rem;
+    color: var(--verde-escuro);
+}
+.eco-pool-info-text {
+    font-size: 0.9375rem;
+    color: var(--cinza-escuro);
+    line-height: 1.5;
+}
+.eco-btn-remove {
+    background: transparent;
+    border: none;
+    color: #d32f2f;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.2s;
+}
+
+.eco-btn-remove:hover {
+    color: #b71c1c;
+    transform: scale(1.1);
+}
+
+.eco-area-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+.eco-pool-body {
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.eco-pool-parameters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.eco-pool-parameters .eco-full {
+    grid-column: 1 / -1;
+}
+.eco-pool-info {
+    display: flex;
+    gap: 1rem;
+    background: var(--cinza-extra-claro);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border-left: 12px solid var(--cinza-claro);
+    margin-bottom: 1rem;
+}
+.eco-pool-info svg {
+    color: var(--verde-medio);
+}
+.eco-info-note {
+    text-align: center;
 }
