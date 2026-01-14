@@ -12,7 +12,6 @@ export class StepLocation {
     async loadStates() {
         try {
             this.states = await this.apiService.getStates()
-            console.log('Estados recebidos:', this.states)
             const stateSelect = document.querySelector('#state')
             if (stateSelect) {
                 stateSelect.innerHTML = '<option value="">Selecione o estado</option>' + 
@@ -36,7 +35,6 @@ export class StepLocation {
     }
 
     async loadCities(state) {
-        console.log('State recebido:', state, typeof state)
         try {
             this.cities = await this.apiService.getCities(state)
             const citySelect = document.querySelector('#city')
@@ -44,12 +42,53 @@ export class StepLocation {
                 citySelect.innerHTML = '<option value="">Selecione a cidade</option>' + 
                     this.cities.map(city => {
                         const cityName = typeof city === 'object' ? city.cidade : String(city)
-                        return `<option value="${cityName}">${cityName}</option>`
+                        const cityNameFormatted = this.capitalizeWords(cityName)
+                        return `<option value="${cityNameFormatted}">${cityNameFormatted}</option>`
                     }).join('')
             }
         } catch (error) {
             console.error('Erro ao carregar cidades:', error);
             alert('Não foi possível carregar as cidades. Tente novamente mais tarde.')
+        }
+    }
+    async loadClimateData(state_city) {
+        try {
+            this.climateData = await this.apiService.getClimateData(state_city)
+            const ventoInfo = document.querySelector('#velocidadeVento')
+            if (ventoInfo && this.climateData.vel_vento) {
+                ventoInfo.textContent = `Velocidade do Vento Média Anual: ${this.climateData.vel_vento} Metros por Segundo.`
+            }
+            const altitudeInfo = document.querySelector('#altitude')
+            if (altitudeInfo && this.climateData.altitude) {
+                altitudeInfo.textContent = `Altitude em relação ao nível do mar: ${this.climateData.altitude} Metros.`
+            }
+            const umidadeInfo = document.querySelector('#umidadeRelativa')
+            if (umidadeInfo && this.climateData.umidade_rel_media) {
+                const umidadePercent = parseFloat(this.climateData.umidade_rel_media * 100).toFixed(2)
+                umidadeInfo.textContent = `Umidade Relativa: ${umidadePercent}%`
+            }
+            return this.climateData
+        } catch (error) {
+            console.error('Erro ao carregar dados climáticos:', error);
+            alert('Não foi possível carregar os dados climáticos. Tente novamente mais tarde.')
+        }
+    }
+    showLocationInfo() {
+        const infoContainer = document.querySelector('#locationInfo')
+        if (infoContainer) {
+            infoContainer.style.display = 'flex'
+            infoContainer.style.animation = 'fadeIn 0.3s ease-in'
+        }
+        const infoText = infoContainer?.querySelector('#umidadeRelativa')
+        if (infoText) {
+            infoText.style.marginBottom = '8px'
+        }
+    }
+
+    hideLocationInfo() {
+        const infoContainer = document.querySelector('#locationInfo')
+        if (infoContainer) {
+            infoContainer.style.display = 'none'
         }
     }
     
@@ -80,6 +119,18 @@ export class StepLocation {
                                 <option value="">Selecione a cidade</option>
                             </select>
                         </div>
+                        <div id="locationInfo" class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                                <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <div>
+                            <p class="eco-pool-info-text" id="velocidadeVento"></p>
+                            <p class="eco-pool-info-text" id="altitude"></p>
+                            <p class="eco-pool-info-text" id="umidadeRelativa"></p>
+                            <p class="eco-pool-info-text" style="font-weight: bold;">Os dados da cidade escolhida foram estimados por semelhança e podem não refletir com precisão as condições climáticas reais.</p>
+                            </div>
+                        </div>                      
                     </div>
                     <div class="eco-step-actions">
                         <button class="eco-btn eco-btn-primary" id="btnNextLocation">Próximo</button>
@@ -96,7 +147,6 @@ export class StepLocation {
 
         stateSelect?.addEventListener('change', async (e) => {
             const stateValue = String(e.target.value || '')
-            console.log('State selecionado:', stateValue, typeof stateValue)
 
             this.data.state = stateValue
             this.data.city = ''
@@ -113,11 +163,14 @@ export class StepLocation {
             }
         })
 
-        citySelect?.addEventListener('change', (e) => {
+        citySelect?.addEventListener('change', async (e) => {
             this.data.city = String(e.target.value || '')
             if (this.data.state && this.data.city) {
                 this.data.state_city = `${this.data.state}-${this.data.city}`
-                console.log('state_city criado:', this.data.state_city)
+                await this.loadClimateData(this.data.state_city)
+                this.showLocationInfo()
+            } else {
+                this.hideLocationInfo()
             }
         })
 

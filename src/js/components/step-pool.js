@@ -7,12 +7,12 @@ export class StepPool {
 		this.data = {
 			areas: [],
 			tanqueCompensacao: 'nao',
-			tipoUtilizacao: 'residencial',
+			tipoUtilizacao: 'privada',
 			utilizacaoAnual: 'ano_inteiro',
             utilizacaoMensal: 'finais_de_semana',
-            localizacaoPiscina: 'externa',
+            localizacaoPiscina: 'local_aberto',
             utilizacaoCapaTermica: 'nao',
-            velocidadeVento: 'medio',
+            velocidadeVento: 'sem_vento',
             reabastecimentoDiario: 0,
             temperaturaDesejada: 32,
             temperaturaInicial: 20,
@@ -33,6 +33,22 @@ export class StepPool {
 			if (tempInfo && this.climateData.temp_minima) {
 				tempInfo.textContent = `Temperatura Ambiente média mais baixa do ano ${this.climateData.temp_minima}°C.`
 			}
+			const windInfo = document.querySelector('#velocidadeVento')
+			if (windInfo && this.climateData.vel_vento) {
+				if (this.climateData.vel_vento < 2.0) {
+					windInfo.value = 'sem_vento'
+				} else if (this.climateData.vel_vento < 4.0) {
+					windInfo.value = 'fraco_2ms'
+				} else if (this.climateData.vel_vento < 6.0) {
+					windInfo.value = 'medio_4ms'
+				} else if (this.climateData.vel_vento >= 6.0) {
+					windInfo.value = 'forte_6ms'
+				}
+				else {
+					windInfo.value = 'sem_vento'
+				}
+			}
+
 		} catch (error) {
 			console.error('Erro ao carregar dados climáticos:', error)
 			const tempInfo = document.querySelector('#tempInfo')
@@ -142,7 +158,17 @@ export class StepPool {
 								</svg>
 								<p class="eco-pool-info-text">Áreas com menos de 0.6 metros de profundidade serão consideradas prainhas.</p>
 							</div>
-								<button type="button" class="eco-btn eco-btn-secondary eco-btn-small" id="btnAddArea">+ Adicionar Área</button>
+							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+									<path d="m9 12 2 2 4-4"/>
+								</svg>
+								<div>
+									<p class="eco-pool-info-text"><strong>Dica:</strong> Piscina com profundidades variadas?</p>
+									<p class="eco-pool-info-text" style="margin-top: 0.25rem;">Adicione uma área separada para cada profundidade diferente (ex: parte rasa de 1m e parte funda de 2m).</p>
+								</div>
+                        	</div>
+							<button type="button" class="eco-btn eco-btn-secondary eco-btn-small" id="btnAddArea">+ Adicionar Área</button>
 							<div id="poolAreasContainer"></div>
 						</div>
 
@@ -159,7 +185,7 @@ export class StepPool {
 						</div>
 						<div class="eco-pool-parameters">
 							<div class="eco-form-group">
-								<label class="eco-label" for="tanqueCompensacao">Tanque de Compensação</label>
+								<label class="eco-label" for="tanqueCompensacao">Tanque de Compensação*¹</label>
 								<select id="tanqueCompensacao" class="eco-select">
 									<option value="nao">Não</option>
 									<option value="sim">Sim</option>
@@ -169,8 +195,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="tipoUtilizacao">Tipo de Utilização</label>
 								<select id="tipoUtilizacao" class="eco-select">
-									<option value="residencial">Residencial</option>
-									<option value="comercial">Comercial</option>
+									<option value="privada">Privada</option>
+									<option value="coletiva">Coletiva</option>
 								</select>
 							</div>
 
@@ -178,7 +204,7 @@ export class StepPool {
 								<label class="eco-label" for="utilizacaoAnual">Utilização Anual</label>
 								<select id="utilizacaoAnual" class="eco-select">
 									<option value="ano_inteiro">Ano Inteiro</option>
-									<option value="verao">Apenas Verão</option>
+									<option value="fora_inverno">Fora do Inverno</option>
 								</select>
 							</div>
 
@@ -193,8 +219,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="localizacaoPiscina">Localização da Piscina</label>
 								<select id="localizacaoPiscina" class="eco-select">
-									<option value="externa">Externa</option>
-									<option value="interna">Interna</option>
+									<option value="local_fechado">Local Fechado</option>
+									<option value="local_aberto">Local Aberto</option>
 								</select>
 							</div>
 
@@ -210,34 +236,34 @@ export class StepPool {
 								<label class="eco-label"for="velocidadeVento">Velocidade do Vento</label>
 								<select id="velocidadeVento" class="eco-select">
 									<option value="sem_vento">Sem Vento</option>
-									<option value="fraco">Fraco</option>
-									<option value="medio" selected>Médio</option>
-									<option value="forte">Forte</option>
+									<option value="fraco_2ms">Fraco 2.0m/s</option>
+									<option value="medio_4ms">Médio 4.0m/s</option>
+									<option value="forte_6ms">Forte 6.0m/s</option>
 								</select>
 							</div>
 
 							<div class="eco-form-group">
-								<label class="eco-label"for="reabastecimentoDiario">Reabastecimento Diário (%)*¹</label>
+								<label class="eco-label"for="reabastecimentoDiario">Reabastecimento Diário (%)*²</label>
 								<input type="number" id="reabastecimentoDiario" class="eco-input" value="0" min="0" max="100" step="1">
 							</div>
 
 							<div class="eco-form-group">
 								<label class="eco-label"for="temperaturaDesejada">Temperatura Desejada (°C)</label>
-								<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" max="40" step="0.5">
+								<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5">
 							</div>
 
 							<div class="eco-form-group">
 								<label class="eco-label" for="temperaturaInicial">Temperatura Inicial (°C)</label>
-								<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="10" max="25" step="0.5">
+								<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="0" step="0.5">
 							</div>
 
 							<div class="eco-form-group">
-								<label class="eco-label"for="comprimentoBordaInfinita">Comprimento Borda Infinita (m)</label>
+								<label class="eco-label"for="comprimentoBordaInfinita">Comprimento Borda Infinita (cm)</label>
 								<input type="number" id="comprimentoBordaInfinita" class="eco-input" value="0" min="0" step="0.1">
 							</div>
 
 							<div class="eco-form-group">
-								<label class="eco-label" for="larguraCascata">Largura da Cascata (m)</label>
+								<label class="eco-label" for="larguraCascata">Largura da Cascata (cm)</label>
 								<input type="number" id="larguraCascata" class="eco-input" value="0" min="0" step="0.1">
 							</div>
 
@@ -248,7 +274,8 @@ export class StepPool {
 
 						</div>
 						<div class="eco-info-note">
-							<p class="eco-pool-info-text">*¹ Reabastecimento para manter o volume da piscina.</p>
+							<p class="eco-pool-info-text">*¹ Cocho da borda infinita.</p>
+							<p class="eco-pool-info-text">*² Reabastecimento para manter o volume da piscina.</p>
 						</div>
 					</div>
 					<div class="eco-step-actions eco-step-actions-double">

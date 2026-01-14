@@ -382,6 +382,19 @@ body {
 .eco-pool-info svg {
     color: var(--verde-medio);
 }
+
 .eco-info-note {
     text-align: center;
+}
+
+.eco-pool-info svg {
+    flex-shrink: 0;
+}
+
+.eco-pool-info > div {
+    flex: 1;
+}
+
+.eco-results{
+    padding: 2rem 2.5rem 1.5rem;
 }

@@ -26,7 +26,8 @@ export class ApiService {
         if (!uf_cidade) {
             throw new Error('Estado e cidade são obrigatórios.');
         }
-        const response = await fetch(`${this.baseUrl}/cities/${uf_cidade}/climate`);
+        const encodedUfCidade = encodeURIComponent(uf_cidade);
+        const response = await fetch(`${this.baseUrl}/cities/${encodedUfCidade}/climate`);
         if (!response.ok) {
             throw new Error('Erro ao buscar dados climáticos');
         }

@@ -1,6 +1,7 @@
 import logoEcopool from "../assets/images/logo-ecopool.png"
 import { StepLocation } from "./components/step-location.js"
 import { StepPool } from "./components/step-pool.js"
+import { StepResult } from "./components/step-result.js"
 import { ApiService } from "./api.js"
 export class App{
 		
