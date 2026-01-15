@@ -3,6 +3,7 @@ import { StepLocation } from "./components/step-location.js"
 import { StepPool } from "./components/step-pool.js"
 import { StepResult } from "./components/step-result.js"
 import { ApiService } from "./api.js"
+import { createIcons, icons } from '../main.js'
 export class App{
 		
 	constructor(containerSelector){
@@ -48,6 +49,9 @@ export class App{
 			</div>
 		`
 		this.bindCurrentStepEvents()
+		setTimeout(() => {
+        	createIcons({icons})
+    	}, 0)
 	}
 
 	bindCurrentStepEvents() {

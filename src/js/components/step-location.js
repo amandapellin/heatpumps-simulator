@@ -29,9 +29,17 @@ export class StepLocation {
     }
 
     capitalizeWords(str) {
-        return str.toLowerCase().split(' ').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ')
+        const prepositions = ['do', 'da', 'dos', 'das', 'de', 'di', 'du', 'e', 'a', 'o']
+        
+        return str.toLowerCase().split(' ').map((word, index) => {
+            if (index === 0) {
+                return word.charAt(0).toUpperCase() + word.slice(1)
+            }
+            if (prepositions.includes(word)) {
+                return word
+            }
+            return word.charAt(0).toUpperCase() + word.slice(1)
+        }).join(' ')
     }
 
     async loadCities(state) {
@@ -98,10 +106,7 @@ export class StepLocation {
                 <div class="eco-card">
                     <div class="eco-header">
                         <div class="eco-card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin">
-                                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
-                                <circle cx="12" cy="10" r="3"/>
-                            </svg>
+                            <i data-lucide="map-pin"></i>
                         </div>
                         <h2 class="eco-card-title">Localização da Piscina</h2>
                         <p class="eco-card-subtitle">Informe o estado e a cidade onde sua piscina está localizada para calcularmos as condições climáticas ideais.</p>
@@ -120,10 +125,7 @@ export class StepLocation {
                             </select>
                         </div>
                         <div id="locationInfo" class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                                <path d="m9 12 2 2 4-4"/>
-                            </svg>
+                            <i data-lucide="info"></i>
                             <div>
                             <p class="eco-pool-info-text" id="velocidadeVento"></p>
                             <p class="eco-pool-info-text" id="altitude"></p>

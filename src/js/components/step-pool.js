@@ -82,11 +82,7 @@ export class StepPool {
                 <div class="eco-area-header">
                     <h3>Área ${area.id}</h3>
                     <button type="button" class="eco-btn-remove" data-area-id="${area.id}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-icon lucide-trash">
-							<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-							<path d="M3 6h18"/>
-							<path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-						</svg>
+                        <i data-lucide="trash-2"></i>
                     </button>
                 </div>
                 <div class="eco-area-fields">
@@ -137,13 +133,7 @@ export class StepPool {
                 <div class="eco-card">
                     <div class="eco-header">
                         <div class="eco-card-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M19 5a2 2 0 0 0-2 2v11"/>
-                                <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-                                <path d="M7 13h10"/>
-                                <path d="M7 9h10"/>
-                                <path d="M9 5a2 2 0 0 0-2 2v11"/>
-                            </svg>
+                            <i data-lucide="waves-ladder"></i>
                         </div>
                         <h2 class="eco-card-title">Dados da Piscina</h2>
                         <p class="eco-card-subtitle">Forneça as informações detalhadas sobre sua piscina para um cálculo preciso.</p>
@@ -151,18 +141,11 @@ export class StepPool {
                     <div class="eco-pool-body">
 						<div class="eco-pool-area">
 							<div class="eco-pool-info">
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info">
-									<circle cx="12" cy="12" r="10"/>
-									<path d="M12 16v-4"/>
-									<path d="M12 8h.01"/>
-								</svg>
+								<i data-lucide="info"></i>
 								<p class="eco-pool-info-text">Áreas com menos de 0.6 metros de profundidade serão consideradas prainhas.</p>
 							</div>
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-									<path d="m9 12 2 2 4-4"/>
-								</svg>
+								<i data-lucide="lightbulb"></i>
 								<div>
 									<p class="eco-pool-info-text"><strong>Dica:</strong> Piscina com profundidades variadas?</p>
 									<p class="eco-pool-info-text" style="margin-top: 0.25rem;">Adicione uma área separada para cada profundidade diferente (ex: parte rasa de 1m e parte funda de 2m).</p>
@@ -174,13 +157,7 @@ export class StepPool {
 
                         <div class="eco-separator"></div>
 						<div class="eco-pool-info">
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thermometer-sun-icon lucide-thermometer-sun">
-								<path d="M12 2v2"/>
-								<path d="M12 8a4 4 0 0 0-1.645 7.647"/>
-								<path d="M2 12h2"/>
-								<path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>
-								<path d="m4.93 4.93 1.41 1.41"/><path d="m6.34 17.66-1.41 1.41"/>
-							</svg>
+							<i data-lucide="thermometer-sun"></i>
 							<p class="eco-pool-info-text" id="tempInfo"></p>
 						</div>
 						<div class="eco-pool-parameters">

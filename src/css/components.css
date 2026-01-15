@@ -395,6 +395,129 @@ body {
     flex: 1;
 }
 
-.eco-results{
+.eco-results-body {
     padding: 2rem 2.5rem 1.5rem;
+}
+
+.eco-result-text {
+    font-size: 0.9375rem;
+    color: var(--cinza-escuro);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.eco-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.eco-results-card {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    background-color: var(--cinza-extra-claro);
+    border: 1px solid var(--cinza-claro);
+    box-shadow: 0 4px 16px rgba(0, 53, 59, 0.1);
+    transition: all 0.3s ease;
+}
+
+.eco-results-card:hover {
+    box-shadow: 0 6px 24px rgba(0, 53, 59, 0.15);
+    transform: translateY(-2px);
+}
+
+.eco-results-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+}
+
+.eco-results-img-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: var(--elements-webflow-library--neutral--100);
+}
+
+.eco-results-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.eco-results-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.eco-result-pump-model {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--verde-titulos);
+    margin: 0;
+}
+
+.eco-results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.eco-results-notes {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--elements-webflow-library--neutral--100);
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+}
+
+.eco-results-chart {
+    padding: 2rem;
+    border-radius: 0.75rem;
+    background-color: var(--cinza-extra-claro);
+    border: 1px solid var(--cinza-claro);
+    margin-top: 1rem;
+}
+
+.eco-results-chart-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.eco-results-header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background-color: rgba(164, 214, 94, 0.15);
+    border-radius: 50%;
+    color: #A4D65E;
+    flex-shrink: 0;   
+}
+
+.eco-results-chart-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--verde-titulos);
+    margin: 0 0 0.5rem 0;
+}
+
+.eco-results-chart-wrapper {
+    background-color: #FFFFFF;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.icon-trending-down {
+    color: var(--verde-medio);
+    flex-shrink: 0;
+    height: 20px;
+    width: 20px;
 }
