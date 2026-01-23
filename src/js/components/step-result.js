@@ -3,6 +3,7 @@ export class StepResult {
     	this.locationData = locationData
     	this.poolData = poolData
     	this.results = this.calculateResults()
+    	this.isTableVisible = false
   	}
 
   	calculateResults() {
@@ -30,6 +31,7 @@ export class StepResult {
         	}
 		}
   	}
+
 	renderCards (){
 		return `
 			<div class=" eco-badge eco-results-warm">
@@ -100,6 +102,7 @@ export class StepResult {
 			</div>
 		`
 	}
+
 	render() {
 		return `
 			<div class="eco-container">
@@ -159,6 +162,9 @@ export class StepResult {
 						</div>
 						${this.renderTable()}
 					</div>
+					<div class="eco-step-actions eco-step-actions-back">
+						<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">Voltar</button>
+					</div>
 					<div class="eco-results-footer">
 						<h3 class="eco-footer-title">Interessado em adquirir uma bomba de calor?</h3>
                         <p class="eco-card-subtitle">Entre em contato com a revenda mais próxima e receba um orçamento personalizado.</p>
@@ -172,17 +178,27 @@ export class StepResult {
 		`
 	}
 
-	bindEvents(onRestart) {
-		const btnRestart = document.querySelector('#btnRestart')
+	bindEvents(onReset, onBack) {
+		const btnBack = document.querySelector('#btnBackPool')
 		const btnDownload = document.querySelector('#btnDownload')
+		const btnMonthlyComparison = document.querySelector('#btnMonthlyComparison')
+		const comparisonTable = document.querySelector('.eco-results-comparison-table')
 
-		btnRestart?.addEventListener('click', () => {
-			onRestart()
+		btnBack?.addEventListener('click', () => {
+			onBack()
 		})
 
 		btnDownload?.addEventListener('click', () => {
 			alert('Funcionalidade de download em desenvolvimento')
 		})
+
+		btnMonthlyComparison?.addEventListener('click', () => {
+			this.isTableVisible = !this.isTableVisible
+			if (comparisonTable) {
+				comparisonTable.style.display = this.isTableVisible ? 'block' : 'none'
+			}
+		})
+
 		setTimeout(() => {
         	this.renderChart()
     	}, 100)
@@ -259,9 +275,10 @@ export class StepResult {
 		}
 		})
   	}
+
 	renderTable(){
 		return `
-			<div class="eco-results-comparison-table">
+			<div class="eco-results-comparison-table" style="display: none;">
 				<h3 class="eco-results-chart-title">Comparativo Mensal de Custos de Operação</h3>
 				<p class="eco-result-text">Análise detalhada dos custos mensais associados a diferentes métodos de aquecimento de piscinas.</p>
 				<div class="eco-results-table-wrapper">

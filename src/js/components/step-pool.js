@@ -1,3 +1,5 @@
+import { createIcons, icons } from '../../main.js'
+
 export class StepPool {
 	constructor(apiService, locationData) {
 		this.apiService = apiService
@@ -82,23 +84,23 @@ export class StepPool {
                 <div class="eco-area-header">
                     <h3>Área ${area.id}</h3>
                     <button type="button" class="eco-btn-remove" data-area-id="${area.id}">
-                        <i data-lucide="trash-2"></i>
+                        <i data-lucide="trash-2" class="eco-icon-trash"></i>
                     </button>
                 </div>
                 <div class="eco-area-fields">
                     <div class="eco-form-group">
                         <label class="eco-label" >Comprimento (m)</label>
-                        <input type="number" class="eco-input" data-field="comprimento" data-area-id="${area.id}" 
+                        <input type="number" class="eco-input" data-field="comprimento" data-area-id="${area.id}"
                             value="${area.comprimento}" placeholder="Ex: 8" step="0.1" min="0">
                     </div>
                     <div class="eco-form-group">
                         <label class="eco-label">Largura (m)</label>
-                        <input type="number" class="eco-input" data-field="largura" data-area-id="${area.id}" 
+                        <input type="number" class="eco-input" data-field="largura" data-area-id="${area.id}"
                             value="${area.largura}" placeholder="Ex: 4" step="0.1" min="0">
                     </div>
                     <div class="eco-form-group">
                         <label class="eco-label">Profundidade (m)</label>
-                        <input type="number" class="eco-input" data-field="profundidade" data-area-id="${area.id}" 
+                        <input type="number" class="eco-input" data-field="profundidade" data-area-id="${area.id}"
                             value="${area.profundidade}" placeholder="Ex: 1.5" step="0.1" min="0">
                     </div>
                 </div>
@@ -106,6 +108,10 @@ export class StepPool {
         `).join('')
 
         this.bindAreaEvents()
+
+        setTimeout(() => {
+            createIcons({icons})
+        }, 0)
     }
     bindAreaEvents() {
         document.querySelectorAll('.eco-btn-remove').forEach(btn => {

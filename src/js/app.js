@@ -84,6 +84,8 @@ export class App{
 					this.locationData = null
 					this.poolData = null
 					this.render()
+				}, () => {
+					this.goToPreviousStep()
 				})
 				break
 		}
