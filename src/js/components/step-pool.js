@@ -9,10 +9,10 @@ export class StepPool {
 		this.data = {
 			areas: [],
 			tanqueCompensacao: 'nao',
-			tipoUtilizacao: 'privada',
+			tipoUtilizacao: 'residencial',
 			utilizacaoAnual: 'ano_inteiro',
             utilizacaoMensal: 'finais_de_semana',
-            localizacaoPiscina: 'local_aberto',
+            localizacaoPiscina: 'externa',
             utilizacaoCapaTermica: 'nao',
             velocidadeVento: 'sem_vento',
             reabastecimentoDiario: 0,
@@ -27,8 +27,9 @@ export class StepPool {
 		try {
 			console.log('Location Data recebido:', this.locationData)
 			console.log('Buscando clima para state_city:', this.locationData.state_city)
-			
-			this.climateData = await this.apiService.getClimateData(this.locationData.state_city)
+
+			const response = await this.apiService.getClimateData(this.locationData.state_city)
+			this.climateData = response.data || response // Extrair data da resposta
 			console.log('Dados climáticos:', this.climateData)
 		
 			const tempInfo = document.querySelector('#tempInfo')
@@ -37,18 +38,18 @@ export class StepPool {
 			}
 			const windInfo = document.querySelector('#velocidadeVento')
 			if (windInfo && this.climateData.vel_vento) {
+				let windCategory = 'sem_vento'
 				if (this.climateData.vel_vento < 2.0) {
-					windInfo.value = 'sem_vento'
+					windCategory = 'sem_vento'
 				} else if (this.climateData.vel_vento < 4.0) {
-					windInfo.value = 'fraco_2ms'
+					windCategory = 'fraco'
 				} else if (this.climateData.vel_vento < 6.0) {
-					windInfo.value = 'medio_4ms'
-				} else if (this.climateData.vel_vento >= 6.0) {
-					windInfo.value = 'forte_6ms'
+					windCategory = 'medio'
+				} else {
+					windCategory = 'forte'
 				}
-				else {
-					windInfo.value = 'sem_vento'
-				}
+				windInfo.value = windCategory
+				this.data.velocidadeVento = windCategory
 			}
 
 		} catch (error) {
@@ -178,8 +179,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="tipoUtilizacao">Tipo de Utilização</label>
 								<select id="tipoUtilizacao" class="eco-select">
-									<option value="privada">Privada</option>
-									<option value="coletiva">Coletiva</option>
+									<option value="residencial">Residencial</option>
+									<option value="comercial">Comercial</option>
 								</select>
 							</div>
 
@@ -187,7 +188,7 @@ export class StepPool {
 								<label class="eco-label" for="utilizacaoAnual">Utilização Anual</label>
 								<select id="utilizacaoAnual" class="eco-select">
 									<option value="ano_inteiro">Ano Inteiro</option>
-									<option value="fora_inverno">Fora do Inverno</option>
+									<option value="verao">Verão</option>
 								</select>
 							</div>
 
@@ -202,8 +203,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="localizacaoPiscina">Localização da Piscina</label>
 								<select id="localizacaoPiscina" class="eco-select">
-									<option value="local_fechado">Local Fechado</option>
-									<option value="local_aberto">Local Aberto</option>
+									<option value="interna">Interna</option>
+									<option value="externa">Externa</option>
 								</select>
 							</div>
 
@@ -219,9 +220,9 @@ export class StepPool {
 								<label class="eco-label"for="velocidadeVento">Velocidade do Vento</label>
 								<select id="velocidadeVento" class="eco-select">
 									<option value="sem_vento">Sem Vento</option>
-									<option value="fraco_2ms">Fraco 2.0m/s</option>
-									<option value="medio_4ms">Médio 4.0m/s</option>
-									<option value="forte_6ms">Forte 6.0m/s</option>
+									<option value="fraco">Fraco (2.0 m/s)</option>
+									<option value="medio">Médio (4.0 m/s)</option>
+									<option value="forte">Forte (6.0 m/s)</option>
 								</select>
 							</div>
 

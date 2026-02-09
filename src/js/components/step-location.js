@@ -11,10 +11,11 @@ export class StepLocation {
     
     async loadStates() {
         try {
-            this.states = await this.apiService.getStates()
+            const response = await this.apiService.getStates()
+            this.states = response.data || response // Extrair data da resposta
             const stateSelect = document.querySelector('#state')
             if (stateSelect) {
-                stateSelect.innerHTML = '<option value="">Selecione o estado</option>' + 
+                stateSelect.innerHTML = '<option value="">Selecione o estado</option>' +
                     this.states.map(state => {
                         const stateCode = typeof state === 'object' ? state.uf : String(state)
                         const stateName = typeof state === 'object' ? state.uf_name : String(state)
@@ -44,10 +45,11 @@ export class StepLocation {
 
     async loadCities(state) {
         try {
-            this.cities = await this.apiService.getCities(state)
+            const response = await this.apiService.getCities(state)
+            this.cities = response.data || response // Extrair data da resposta
             const citySelect = document.querySelector('#city')
             if (citySelect) {
-                citySelect.innerHTML = '<option value="">Selecione a cidade</option>' + 
+                citySelect.innerHTML = '<option value="">Selecione a cidade</option>' +
                     this.cities.map(city => {
                         const cityName = typeof city === 'object' ? city.cidade : String(city)
                         const cityNameFormatted = this.capitalizeWords(cityName)
@@ -61,7 +63,8 @@ export class StepLocation {
     }
     async loadClimateData(state_city) {
         try {
-            this.climateData = await this.apiService.getClimateData(state_city)
+            const response = await this.apiService.getClimateData(state_city)
+            this.climateData = response.data || response // Extrair data da resposta
             const ventoInfo = document.querySelector('#velocidadeVento')
             if (ventoInfo && this.climateData.vel_vento) {
                 ventoInfo.textContent = `Velocidade do Vento Média Anual: ${this.climateData.vel_vento} Metros por Segundo.`

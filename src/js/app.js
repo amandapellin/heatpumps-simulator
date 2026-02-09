@@ -12,7 +12,7 @@ export class App{
 		this.locationData = null
 		this.poolData = null
 
-		this.apiService = new ApiService('http://localhost:3000/api')
+		this.apiService = new ApiService() // Usa variável de ambiente automaticamente
 		this.stepLocation = new StepLocation(this.apiService)
 		this.stepPool = null
 	}
@@ -34,8 +34,52 @@ export class App{
 				this.stepPool = new StepPool(this.apiService, this.locationData)
 				return this.stepPool.render()
 			case 3:
-				const stepResult = new StepResult(this.locationData, this.poolData)
-				return stepResult.render()
+				// Criar instância do StepResult com apiService
+				this.stepResult = new StepResult(this.locationData, this.poolData, this.apiService)
+
+				// Carregar resultados da simulação assincronamente
+				this.stepResult.loadSimulationResults()
+					.then(() => {
+						// Re-renderizar após carregar dados
+						const container = document.querySelector('.eco-container')
+						if (container) {
+							container.innerHTML = this.stepResult.render()
+							this.stepResult.bindEvents(() => {
+								this.currentStep = 1
+								this.locationData = null
+								this.poolData = null
+								this.render()
+							}, () => {
+								this.goToPreviousStep()
+							})
+							// Re-criar ícones após re-renderizar
+							setTimeout(() => {
+								createIcons({icons})
+							}, 0)
+						}
+					})
+					.catch(error => {
+						console.error('Erro ao carregar resultados:', error)
+						// Re-renderizar para mostrar erro
+						const container = document.querySelector('.eco-container')
+						if (container) {
+							container.innerHTML = this.stepResult.render()
+							this.stepResult.bindEvents(() => {
+								this.currentStep = 1
+								this.locationData = null
+								this.poolData = null
+								this.render()
+							}, () => {
+								this.goToPreviousStep()
+							})
+							setTimeout(() => {
+								createIcons({icons})
+							}, 0)
+						}
+					})
+
+				// Retorna renderização inicial (loading)
+				return this.stepResult.render()
 			default:
 				return this.stepLocation.render()
 		}
@@ -78,15 +122,17 @@ export class App{
 				break
 			
 			case 3:
-				const stepResult = new StepResult(this.locationData, this.poolData)
-				stepResult.bindEvents(() => {
-					this.currentStep = 1
-					this.locationData = null
-					this.poolData = null
-					this.render()
-				}, () => {
-					this.goToPreviousStep()
-				})
+				// StepResult já foi criado em renderStep(), apenas bind dos eventos
+				if (this.stepResult) {
+					this.stepResult.bindEvents(() => {
+						this.currentStep = 1
+						this.locationData = null
+						this.poolData = null
+						this.render()
+					}, () => {
+						this.goToPreviousStep()
+					})
+				}
 				break
 		}
 	}
