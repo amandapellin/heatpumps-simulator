@@ -9,7 +9,7 @@ export class StepPool {
 		this.data = {
 			areas: [],
 			tanqueCompensacao: 'nao',
-			tipoUtilizacao: 'residencial',
+			tipoUtilizacao: 'privada',
 			utilizacaoAnual: 'ano_inteiro',
             utilizacaoMensal: 'finais_de_semana',
             localizacaoPiscina: 'externa',
@@ -179,8 +179,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="tipoUtilizacao">Tipo de Utilização</label>
 								<select id="tipoUtilizacao" class="eco-select">
-									<option value="residencial">Residencial</option>
-									<option value="comercial">Comercial</option>
+									<option value="privada">Privada</option>
+									<option value="coletiva">Coletiva</option>
 								</select>
 							</div>
 

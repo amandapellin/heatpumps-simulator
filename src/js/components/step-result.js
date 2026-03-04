@@ -102,6 +102,12 @@ export class StepResult {
 		const economiaPercent = Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
 
 		const heatingTimes = this.results.heatingTimes || {}
+	
+		const fmtKwh = (v) => v > 0 ? v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' kWh' : '--'
+		const hotKwh  = this.results?.comparison?.heatPumpHot?.firstHeatingKwh ?? 0
+		const coldKwh = this.results?.comparison?.heatPumpCold?.firstHeatingKwh ?? 0
+		const hotCost  = this.results?.comparison?.heatPumpHot?.firstHeatingCost ?? 0
+		const coldCost = this.results?.comparison?.heatPumpCold?.firstHeatingCost ?? 0
 
 		const fmtTime = (hours) => {
 			if (hours == null) return 'N/A'
@@ -131,6 +137,11 @@ export class StepResult {
 								<p class="eco-result-text"><strong>Tempo de Aquecimento:</strong> ${fmtTime(heatingTimes.hot)}</p>
 							</div>
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+								<i data-lucide="plug"></i>
+								<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(hotKwh)}</p>
+								<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> ${fmtBRL(hotCost)}</p>
+							</div>
+							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
 								<i data-lucide="leaf"></i>
 								<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
 							</div>
@@ -156,6 +167,11 @@ export class StepResult {
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
 								<i data-lucide="clock-4"></i>
 								<p class="eco-result-text"><strong>Tempo de Aquecimento:</strong> ${fmtTime(heatingTimes.cold)}</p>
+							</div>
+							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+								<i data-lucide="plug"></i>
+								<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(coldKwh)}</p>
+								<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> ${fmtBRL(coldCost)}</p>
 							</div>
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
 								<i data-lucide="leaf"></i>
@@ -289,7 +305,7 @@ export class StepResult {
 		this.chart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: [pumpHotLabel, pumpColdLabel, 'Resistência', 'GLP', 'Gás Natural', 'Pellet'],
+				labels: [pumpHotLabel, pumpColdLabel, 'Resistência', 'Gás Natural', 'Pellet'],
 				datasets: [
 					{
 						label: 'Custo Anual',
@@ -297,7 +313,6 @@ export class StepResult {
 							comparison.heatPumpHot.annual,
 							comparison.heatPumpCold.annual,
 							comparison.eletrica.annual,
-							comparison.glp.annual,
 							comparison.gn.annual,
 							comparison.pellet.annual
 						],
@@ -312,7 +327,6 @@ export class StepResult {
 							comparison.heatPumpHot.monthly,
 							comparison.heatPumpCold.monthly,
 							comparison.eletrica.monthly,
-							comparison.glp.monthly,
 							comparison.gn.monthly,
 							comparison.pellet.monthly
 						],
@@ -383,16 +397,16 @@ export class StepResult {
 		}
 
 		const comp = this.results.comparison
-		const glpSavings = comp.glp.savings || 0
-		const glpAnnual = comp.glp.annual || 1
-		const savingsPercent = Math.round((glpSavings / glpAnnual) * 100)
-		const monthlySavings = glpSavings / 12
+		const gnSavings = comp.gn.savings || 0
+		const gnAnnual = comp.gn.annual || 1
+		const savingsPercent = Math.round((gnSavings / gnAnnual) * 100)
+		const monthlySavings = gnSavings / 12
 
 		const fmtBRL = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 		return `
 			<div class="eco-results-chart-item">
-				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás GLP</span>
+				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás Natural</span>
 				<i data-lucide="zap" class="eco-result-chart-icon"></i>
 				<div>
 					<p class="eco-result-text">Economia mensal média</p>
@@ -400,11 +414,11 @@ export class StepResult {
 				</div>
 			</div>
 			<div class="eco-results-chart-item">
-				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás GLP</span>
+				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás Natural</span>
 				<i data-lucide="trending-down" class="eco-result-chart-icon"></i>
 				<div>
 					<p class="eco-result-text">Economia anual</p>
-					<p class="eco-result-text-value">R$ ${fmtBRL(glpSavings)} (${savingsPercent}%)</p>
+					<p class="eco-result-text-value">R$ ${fmtBRL(gnSavings)} (${savingsPercent}%)</p>
 				</div>
 			</div>
 		`
@@ -461,16 +475,6 @@ export class StepResult {
 						label: 'Elétrico',
 						data: comparison.eletrica.monthlyBreakdown,
 						borderColor: '#C62828',
-						borderWidth: 2.5,
-						pointRadius: 0,
-						pointHoverRadius: 5,
-						tension: 0.4,
-						fill: false
-					},
-					{
-						label: 'GLP',
-						data: comparison.glp.monthlyBreakdown,
-						borderColor: '#2E7D32',
 						borderWidth: 2.5,
 						pointRadius: 0,
 						pointHoverRadius: 5,
@@ -675,8 +679,6 @@ export class StepResult {
 					<td>${fmtCurrency(comparison.heatPumpCold.monthlyBreakdown[i])}</td>
 					<td>${fmt(comparison.eletrica.consumption[i])}</td>
 					<td>${fmtCurrency(comparison.eletrica.monthlyBreakdown[i])}</td>
-					<td>${fmt(comparison.glp.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.glp.monthlyBreakdown[i])}</td>
 					<td>${fmt(comparison.gn.consumption[i])}</td>
 					<td>${fmtCurrency(comparison.gn.monthlyBreakdown[i])}</td>
 					<td>${fmt(comparison.pellet.consumption[i])}</td>
@@ -697,7 +699,6 @@ export class StepResult {
 								<th colspan="2">${pumpHotLabel}</th>
 								<th colspan="2">${pumpColdLabel}</th>
 								<th colspan="2">Resistência</th>
-								<th colspan="2">GLP</th>
 								<th colspan="2">Gás Natural</th>
 								<th colspan="2">Pellet</th>
 							</tr>
@@ -708,8 +709,6 @@ export class StepResult {
 								<th>Consumo (kWh)</th>
 								<th>Custo</th>
 								<th>Consumo (kWh)</th>
-								<th>Custo</th>
-								<th>Consumo (kg)</th>
 								<th>Custo</th>
 								<th>Consumo (m³)</th>
 								<th>Custo</th>
@@ -729,8 +728,6 @@ export class StepResult {
 								<td><strong>${fmtCurrency(comparison.heatPumpCold.annual)}</strong></td>
 								<td><strong>${fmt(sumArray(comparison.eletrica.consumption))} kWh</strong></td>
 								<td><strong>${fmtCurrency(comparison.eletrica.annual)}</strong></td>
-								<td><strong>${fmt(sumArray(comparison.glp.consumption))} kg</strong></td>
-								<td><strong>${fmtCurrency(comparison.glp.annual)}</strong></td>
 								<td><strong>${fmt(sumArray(comparison.gn.consumption))} m³</strong></td>
 								<td><strong>${fmtCurrency(comparison.gn.annual)}</strong></td>
 								<td><strong>${fmt(sumArray(comparison.pellet.consumption))} kg</strong></td>
