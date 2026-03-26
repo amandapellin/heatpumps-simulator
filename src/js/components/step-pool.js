@@ -203,8 +203,8 @@ export class StepPool {
 							<div class="eco-form-group">
 								<label class="eco-label" for="localizacaoPiscina">Localização da Piscina</label>
 								<select id="localizacaoPiscina" class="eco-select">
+									<option value="externa" selected>Externa</option>
 									<option value="interna">Interna</option>
-									<option value="externa">Externa</option>
 								</select>
 							</div>
 

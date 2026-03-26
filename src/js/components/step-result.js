@@ -30,8 +30,8 @@ export class StepResult {
 				reabastecimentoDiario: parseFloat(this.poolData.reabastecimentoDiario || 0),
 				temperaturaDesejada: parseFloat(this.poolData.temperaturaDesejada || 32),
 				temperaturaInicial: parseFloat(this.poolData.temperaturaInicial || 20),
-				comprimentoBordaInfinita: parseFloat(this.poolData.comprimentoBordaInfinita || 0) / 100,
-				larguraCascata: parseFloat(this.poolData.larguraCascata || 0) / 100,
+				comprimentoBordaInfinita: parseFloat(this.poolData.comprimentoBordaInfinita || 0),
+				larguraCascata: parseFloat(this.poolData.larguraCascata || 0),
 				dispositivoHidromassagem: parseInt(this.poolData.dispositivoHidromassagem || 0)
 			}
 
@@ -95,12 +95,14 @@ export class StepResult {
 		const combinations = this.results.pumpCombinations || []
 		const comparison = this.results.comparison
 
-		const fmtBRL = (v) => v ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'
+		const fmtBRL = (v) => v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'
 
-		const heatPumpAnnual = comparison?.heatPumpHot?.annual || 0
-		const eletricaAnnual = comparison?.eletrica?.annual || 1
-		const economiaPercent = Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
-
+		const heatPumpAnnual = comparison?.heatPumpHot?.annual ?? 0
+		const eletricaAnnual = comparison?.eletrica?.annual ?? 0
+		const economiaPercent = (eletricaAnnual > 0 && heatPumpAnnual > 0 && heatPumpAnnual < eletricaAnnual)
+			? Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
+			: null
+			
 		const heatingTimes = this.results.heatingTimes || {}
 
 		const fmtKwh = (v) => v > 0 ? v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' kWh' : '--'
@@ -117,7 +119,6 @@ export class StepResult {
 			return `${h}h ${m}min`
 		}
 
-		// Se há combinações, a demanda supera a maior bomba individual — exibir combinações
 		if (combinations && combinations.hot && combinations.cold) {
 			const comboHot  = combinations.hot
 			const comboCold = combinations.cold
@@ -146,10 +147,6 @@ export class StepResult {
 				</div>
 			`
 			return `
-				<div class="eco-pool-info" style="border-left-color: #F59E0B; background: rgba(245, 158, 11, 0.08); margin-bottom: 1rem;">
-					<i data-lucide="layers"></i>
-					<p class="eco-result-text">A energia necessária supera a capacidade da maior bomba disponível. Abaixo estão as combinações recomendadas para cada clima.</p>
-				</div>
 				${renderComboCard(comboHot,  'Clima quente', 'eco-results-warm', 'thermometer-sun')}
 				${renderComboCard(comboCold, 'Clima frio',   'eco-results-cold', 'thermometer-snowflake')}
 			`
@@ -339,7 +336,15 @@ export class StepResult {
 
 		const pumpHotLabel = this.results.recommendedPumpHot ? `${this.results.recommendedPumpHot.modelo}` : 'Bomba de Calor ECOPOOL'
 		const pumpColdLabel = this.results.recommendedPumpCold ? `${this.results.recommendedPumpCold.modelo}` : 'Bomba de Calor ECOPOOL'
+		const annualData = [
+			comparison.heatPumpHot.annual,
+			comparison.heatPumpCold.annual,
+			comparison.eletrica.annual,
+			comparison.gn.annual,
+			comparison.pellet.annual,
+		]
 
+		const monthlyAvgData = annualData.map(v => parseFloat((v / 12).toFixed(2)))
 		this.chart = new Chart(ctx, {
 			type: 'bar',
 			data: {
@@ -347,13 +352,7 @@ export class StepResult {
 				datasets: [
 					{
 						label: 'Custo Anual',
-						data: [
-							comparison.heatPumpHot.annual,
-							comparison.heatPumpCold.annual,
-							comparison.eletrica.annual,
-							comparison.gn.annual,
-							comparison.pellet.annual
-						],
+						data: annualData,
 						backgroundColor: '#00353B',
 						borderRadius: 4,
 						barPercentage: 0.7,
@@ -361,13 +360,7 @@ export class StepResult {
 					},
 					{
 						label: 'Custo Mensal',
-						data: [
-							comparison.heatPumpHot.monthly,
-							comparison.heatPumpCold.monthly,
-							comparison.eletrica.monthly,
-							comparison.gn.monthly,
-							comparison.pellet.monthly
-						],
+						data: monthlyAvgData,
 						backgroundColor: '#7CB342',
 						borderRadius: 4,
 						barPercentage: 0.7,
