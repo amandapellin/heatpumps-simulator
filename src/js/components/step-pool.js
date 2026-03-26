@@ -323,7 +323,8 @@ export class StepPool {
             this.data.areas = this.areas.map(area => ({
                 comprimento: parseFloat(area.comprimento),
                 largura: parseFloat(area.largura),
-                profundidade: parseFloat(area.profundidade)
+                profundidade: parseFloat(area.profundidade),
+                isPrainha: parseFloat(area.profundidade) < 0.6
             }))
 
             onNext(this.data)

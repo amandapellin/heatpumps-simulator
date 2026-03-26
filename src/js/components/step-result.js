@@ -30,8 +30,8 @@ export class StepResult {
 				reabastecimentoDiario: parseFloat(this.poolData.reabastecimentoDiario || 0),
 				temperaturaDesejada: parseFloat(this.poolData.temperaturaDesejada || 32),
 				temperaturaInicial: parseFloat(this.poolData.temperaturaInicial || 20),
-				comprimentoBordaInfinita: parseFloat(this.poolData.comprimentoBordaInfinita || 0),
-				larguraCascata: parseFloat(this.poolData.larguraCascata || 0),
+				comprimentoBordaInfinita: parseFloat(this.poolData.comprimentoBordaInfinita || 0) / 100,
+				larguraCascata: parseFloat(this.poolData.larguraCascata || 0) / 100,
 				dispositivoHidromassagem: parseInt(this.poolData.dispositivoHidromassagem || 0)
 			}
 
@@ -92,17 +92,17 @@ export class StepResult {
 
 		const pumpHot = this.results.recommendedPumpHot
 		const pumpCold = this.results.recommendedPumpCold
+		const combinations = this.results.pumpCombinations || []
 		const comparison = this.results.comparison
 
 		const fmtBRL = (v) => v ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'
-		const fmtNum = (v) => v ? v.toLocaleString('pt-BR') : 'N/A'
 
 		const heatPumpAnnual = comparison?.heatPumpHot?.annual || 0
 		const eletricaAnnual = comparison?.eletrica?.annual || 1
 		const economiaPercent = Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
 
 		const heatingTimes = this.results.heatingTimes || {}
-	
+
 		const fmtKwh = (v) => v > 0 ? v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' kWh' : '--'
 		const hotKwh  = this.results?.comparison?.heatPumpHot?.firstHeatingKwh ?? 0
 		const coldKwh = this.results?.comparison?.heatPumpCold?.firstHeatingKwh ?? 0
@@ -115,6 +115,44 @@ export class StepResult {
 			const m = Math.round((hours - h) * 60)
 			if (m === 0) return `${h} horas`
 			return `${h}h ${m}min`
+		}
+
+		// Se há combinações, a demanda supera a maior bomba individual — exibir combinações
+		if (combinations && combinations.hot && combinations.cold) {
+			const comboHot  = combinations.hot
+			const comboCold = combinations.cold
+			const renderComboCard = (combo, climateLabel, climateClass, icon) => `
+				<div class="eco-results-card">
+					<div class="eco-results-layout">
+						<div class="eco-results-img-container">
+							<img class="eco-results-img" src="${combo.pump.img_url || 'https://via.placeholder.com/150'}" alt="${combo.pump.modelo}">
+						</div>
+						<div class="eco-results-info">
+							<h3 class="eco-result-pump-model">${combo.quantity}× ${combo.pump.modelo}</h3>
+							<div class="eco-badge ${climateClass}" style="margin-bottom: 0.5rem;">
+								<i data-lucide="${icon}"></i>
+								<p class="eco-result-text">${climateLabel} — ${combo.quantity} unidades / Capacidade: ${combo.totalBtu.toLocaleString('pt-BR')} BTU/h</p>
+							</div>
+							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+								<i data-lucide="clock-4"></i>
+								<p class="eco-result-text"><strong>Tempo de aquecimento:</strong> ${fmtTime(combo.heatingTime)}</p>
+							</div>
+							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+								<i data-lucide="leaf"></i>
+								<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			`
+			return `
+				<div class="eco-pool-info" style="border-left-color: #F59E0B; background: rgba(245, 158, 11, 0.08); margin-bottom: 1rem;">
+					<i data-lucide="layers"></i>
+					<p class="eco-result-text">A energia necessária supera a capacidade da maior bomba disponível. Abaixo estão as combinações recomendadas para cada clima.</p>
+				</div>
+				${renderComboCard(comboHot,  'Clima quente', 'eco-results-warm', 'thermometer-sun')}
+				${renderComboCard(comboCold, 'Clima frio',   'eco-results-cold', 'thermometer-snowflake')}
+			`
 		}
 
 		let html = ''
