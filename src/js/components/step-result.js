@@ -54,8 +54,55 @@ export class StepResult {
 			throw error
 		}
 	}
+	_getPumpLabels() {
+		const combinations = this.results?.pumpCombinations
+		const hasCombinations = combinations?.hot && combinations?.cold
 
-	renderCards (){
+		const hotLabel = hasCombinations
+			? `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`
+			: (this.results?.recommendedPumpHot?.modelo ?? 'Bomba ECOPOOL (quente)')
+
+		const coldLabel = hasCombinations
+			? `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`
+			: (this.results?.recommendedPumpCold?.modelo ?? 'Bomba ECOPOOL (fria)')
+
+		return { hotLabel, coldLabel }
+	}
+	renderPumpCard({ imgUrl, modelo, badgeClass, badgeIcon, badgeLabel, heatingTime, kwh, cost, economiaPercent, fmtTime, fmtKwh, fmtBRL }) {
+		return `
+			<div class="eco-results-card">
+				<div class="eco-results-header">
+					<div class="eco-results-img-container">
+						<img class="eco-results-img" src="${imgUrl}" alt="${modelo}">
+					</div>
+					<div class="eco-results-info">
+						<h3 class="eco-result-pump-model">${modelo}</h3>
+						<div class="eco-badge ${badgeClass}">
+							<i data-lucide="${badgeIcon}"></i>
+							<p class="eco-result-text">${badgeLabel}</p>
+						</div>
+					</div>
+				</div>
+				<div class="eco-results-card-body">
+					<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+						<i data-lucide="clock-4"></i>
+						<p class="eco-result-text"><strong>Tempo de Aquecimento:</strong> ${fmtTime(heatingTime)}</p>
+					</div>
+					<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+						<i data-lucide="plug"></i>
+						<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(kwh)}</p>
+						<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> <span style="white-space: nowrap">${fmtBRL(cost)}</span></p>
+					</div>
+					<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
+						<i data-lucide="leaf"></i>
+						<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
+					</div>
+				</div>
+			</div>
+		`
+	}
+
+	renderCards() {
 		if (this.isLoading) {
 			return `
 				<div class="eco-loading" style="text-align: center; padding: 3rem;">
@@ -90,135 +137,45 @@ export class StepResult {
 			`
 		}
 
-		const pumpHot = this.results.recommendedPumpHot
-		const pumpCold = this.results.recommendedPumpCold
-		const combinations = this.results.pumpCombinations || []
-		const comparison = this.results.comparison
+		const pumpHot       = this.results.recommendedPumpHot
+		const pumpCold      = this.results.recommendedPumpCold
+		const combinations  = this.results.pumpCombinations || []
+		const comparison    = this.results.comparison
+		const heatingTimes  = this.results.heatingTimes || {}
 
-		const fmtBRL = (v) => v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'
+		const fmtBRL  = (v) => v > 0 ? `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'N/A'
+		const fmtKwh  = (v) => v > 0 ? v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' kWh' : '--'
+		const fmtTime = (hours) => {
+			if (hours == null) return 'N/A'
+			const h = Math.floor(hours)
+			const m = Math.round((hours - h) * 60)
+			return m === 0 ? `${h} horas` : `${h}h ${m}min`
+		}
 
 		const heatPumpAnnual = comparison?.heatPumpHot?.annual ?? 0
 		const eletricaAnnual = comparison?.eletrica?.annual ?? 0
 		const economiaPercent = (eletricaAnnual > 0 && heatPumpAnnual > 0 && heatPumpAnnual < eletricaAnnual)
 			? Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
 			: null
-			
-		const heatingTimes = this.results.heatingTimes || {}
 
-		const fmtKwh = (v) => v > 0 ? v.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) + ' kWh' : '--'
-		const hotKwh  = this.results?.comparison?.heatPumpHot?.firstHeatingKwh ?? 0
-		const coldKwh = this.results?.comparison?.heatPumpCold?.firstHeatingKwh ?? 0
-		const hotCost  = this.results?.comparison?.heatPumpHot?.firstHeatingCost ?? 0
-		const coldCost = this.results?.comparison?.heatPumpCold?.firstHeatingCost ?? 0
+		const hotKwh  = comparison?.heatPumpHot?.firstHeatingKwh  ?? 0
+		const coldKwh = comparison?.heatPumpCold?.firstHeatingKwh ?? 0
+		const hotCost  = comparison?.heatPumpHot?.firstHeatingCost  ?? 0
+		const coldCost = comparison?.heatPumpCold?.firstHeatingCost ?? 0
 
-		const fmtTime = (hours) => {
-			if (hours == null) return 'N/A'
-			const h = Math.floor(hours)
-			const m = Math.round((hours - h) * 60)
-			if (m === 0) return `${h} horas`
-			return `${h}h ${m}min`
-		}
+		const commonArgs = { economiaPercent, fmtTime, fmtKwh, fmtBRL }
 
-		if (combinations && combinations.hot && combinations.cold) {
-			const comboHot  = combinations.hot
-			const comboCold = combinations.cold
-			const renderComboCard = (combo, climateLabel, climateClass, icon) => `
-				<div class="eco-results-card">
-					<div class="eco-results-layout">
-						<div class="eco-results-img-container">
-							<img class="eco-results-img" src="${combo.pump.img_url || 'https://via.placeholder.com/150'}" alt="${combo.pump.modelo}">
-						</div>
-						<div class="eco-results-info">
-							<h3 class="eco-result-pump-model">${combo.quantity}× ${combo.pump.modelo}</h3>
-							<div class="eco-badge ${climateClass}" style="margin-bottom: 0.5rem;">
-								<i data-lucide="${icon}"></i>
-								<p class="eco-result-text">${climateLabel} — ${combo.quantity} unidades / Capacidade: ${combo.totalBtu.toLocaleString('pt-BR')} BTU/h</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="clock-4"></i>
-								<p class="eco-result-text"><strong>Tempo de aquecimento:</strong> ${fmtTime(combo.heatingTime)}</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="leaf"></i>
-								<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			`
+		if (combinations?.hot && combinations?.cold) {
 			return `
-				${renderComboCard(comboHot,  'Clima quente', 'eco-results-warm', 'thermometer-sun')}
-				${renderComboCard(comboCold, 'Clima frio',   'eco-results-cold', 'thermometer-snowflake')}
+				${this.renderPumpCard({ imgUrl: combinations.hot.pump.img_url,  modelo: `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: combinations.hot.heatingTime,  kwh: hotKwh,  cost: hotCost,  ...commonArgs })}
+				${this.renderPumpCard({ imgUrl: combinations.cold.pump.img_url, modelo: `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: combinations.cold.heatingTime, kwh: coldKwh, cost: coldCost, ...commonArgs })}
 			`
 		}
 
-		let html = ''
-
-		if (pumpHot) {
-			html += `
-				<div class="eco-results-card">
-					<div class="eco-results-layout">
-						<div class="eco-results-img-container">
-							<img class="eco-results-img" src="${pumpHot.img_url || 'https://via.placeholder.com/150'}" alt="${pumpHot.modelo}">
-						</div>
-						<div class="eco-results-info">
-							<h3 class="eco-result-pump-model">${pumpHot.modelo}</h3>
-							<div class="eco-badge eco-results-warm">
-								<i data-lucide="thermometer-sun"></i>
-								<p class="eco-result-text">Ideal para regiões mais quentes.</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="clock-4"></i>
-								<p class="eco-result-text"><strong>Tempo de Aquecimento:</strong> ${fmtTime(heatingTimes.hot)}</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="plug"></i>
-								<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(hotKwh)}</p>
-								<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> ${fmtBRL(hotCost)}</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="leaf"></i>
-								<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			`
-		}
-
-		if (pumpCold) {
-			html += `
-				<div class="eco-results-card">
-					<div class="eco-results-layout">
-						<div class="eco-results-img-container">
-							<img class="eco-results-img" src="${pumpCold.img_url || 'https://via.placeholder.com/150'}" alt="${pumpCold.modelo}">
-						</div>
-						<div class="eco-results-info">
-							<h3 class="eco-result-pump-model">${pumpCold.modelo}</h3>
-							<div class="eco-badge eco-results-cold">
-								<i data-lucide="thermometer-snowflake"></i>
-								<p class="eco-result-text">Ideal para regiões mais frias.</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="clock-4"></i>
-								<p class="eco-result-text"><strong>Tempo de Aquecimento:</strong> ${fmtTime(heatingTimes.cold)}</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="plug"></i>
-								<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(coldKwh)}</p>
-								<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> ${fmtBRL(coldCost)}</p>
-							</div>
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
-								<i data-lucide="leaf"></i>
-								<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			`
-		}
-
-		return html
+		return `
+			${pumpHot  ? this.renderPumpCard({ imgUrl: pumpHot.img_url,  modelo: pumpHot.modelo,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: heatingTimes.hot,  kwh: hotKwh,  cost: hotCost,  ...commonArgs }) : ''}
+			${pumpCold ? this.renderPumpCard({ imgUrl: pumpCold.img_url, modelo: pumpCold.modelo, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: heatingTimes.cold, kwh: coldKwh, cost: coldCost, ...commonArgs }) : ''}
+		`
 	}
 
 	render() {
@@ -329,13 +286,13 @@ export class StepResult {
 
 		const ctx = canvas.getContext('2d')
 		const { comparison } = this.results
+		const { hotLabel, coldLabel } = this._getPumpLabels() 
 
 		if (this.chart) {
 			this.chart.destroy()
 		}
 
-		const pumpHotLabel = this.results.recommendedPumpHot ? `${this.results.recommendedPumpHot.modelo}` : 'Bomba de Calor ECOPOOL'
-		const pumpColdLabel = this.results.recommendedPumpCold ? `${this.results.recommendedPumpCold.modelo}` : 'Bomba de Calor ECOPOOL'
+
 		const annualData = [
 			comparison.heatPumpHot.annual,
 			comparison.heatPumpCold.annual,
@@ -348,7 +305,7 @@ export class StepResult {
 		this.chart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: [pumpHotLabel, pumpColdLabel, 'Resistência', 'Gás Natural', 'Pellet'],
+				labels: [hotLabel, coldLabel, 'Resistência', 'Gás Natural', 'Pellet'],
 				datasets: [
 					{
 						label: 'Custo Anual',
@@ -461,6 +418,7 @@ export class StepResult {
 
 		const ctx = canvas.getContext('2d')
 		const { comparison } = this.results
+		const { hotLabel, coldLabel } = this._getPumpLabels() 
 
 		if (this.monthlyChart) {
 			this.monthlyChart.destroy()
@@ -473,8 +431,7 @@ export class StepResult {
 
 		const pumpHot = this.results.recommendedPumpHot
 		const pumpCold = this.results.recommendedPumpCold
-		const pumpHotLabel = pumpHot ? `${pumpHot.modelo}` : 'Bomba de Calor ECOPOOL'
-		const pumpColdLabel = pumpCold ? `${pumpCold.modelo}` : 'Bomba de Calor ECOPOOL'
+
 
 		this.monthlyChart = new Chart(ctx, {
 			type: 'line',
@@ -482,7 +439,7 @@ export class StepResult {
 				labels: monthLabels,
 				datasets: [
 					{
-						label: pumpHotLabel,
+						label: hotLabel,
 						data: comparison.heatPumpHot.monthlyBreakdown,
 						borderColor: '#1a3a8a',
 						borderWidth: 2.5,
@@ -492,7 +449,7 @@ export class StepResult {
 						fill: false
 					},
 					{
-						label: pumpColdLabel,
+						label: coldLabel,
 						data: comparison.heatPumpCold.monthlyBreakdown,
 						borderColor: '#0288D1',
 						borderWidth: 2.5,
@@ -679,13 +636,11 @@ export class StepResult {
 		}
 
 		const { comparison } = this.results
+		const { hotLabel, coldLabel } = this._getPumpLabels()
 		const months = comparison.monthNames || [
 			'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
 			'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
 		]
-
-		const pumpHotLabel = this.results.recommendedPumpHot ? `${this.results.recommendedPumpHot.modelo}` : 'Bomba de Calor ECOPOOL'
-		const pumpColdLabel = this.results.recommendedPumpCold ? `${this.results.recommendedPumpCold.modelo}` : 'Bomba de Calor ECOPOOL'
 
 		const fmt = (value) => {
 			if (value == null || isNaN(value)) return '-'
@@ -727,8 +682,8 @@ export class StepResult {
 						<thead>
 							<tr>
 								<th></th>
-								<th colspan="2">${pumpHotLabel}</th>
-								<th colspan="2">${pumpColdLabel}</th>
+								<th colspan="2">${hotLabel}</th>
+								<th colspan="2">${coldLabel}</th>
 								<th colspan="2">Resistência</th>
 								<th colspan="2">Gás Natural</th>
 								<th colspan="2">Pellet</th>
