@@ -36,19 +36,11 @@ export class StepPool {
 			if (tempInfo && this.climateData.temp_minima) {
 				tempInfo.textContent = `Temperatura Ambiente média mais baixa do ano ${this.climateData.temp_minima}°C.`
 			}
-			const windInfo = document.querySelector('#velocidadeVento')
-			if (windInfo && this.climateData.vel_vento) {
-				let windCategory = 'sem_vento'
-				if (this.climateData.vel_vento < 2.0) {
-					windCategory = 'sem_vento'
-				} else if (this.climateData.vel_vento < 4.0) {
-					windCategory = 'fraco'
-				} else if (this.climateData.vel_vento < 6.0) {
-					windCategory = 'medio'
-				} else {
-					windCategory = 'forte'
-				}
-				windInfo.value = windCategory
+			// wind_category vem do backend (City::getWindCategory) — fonte única.
+			const windSelect = document.querySelector('#velocidadeVento')
+			const windCategory = this.climateData.wind_category
+			if (windSelect && windCategory) {
+				windSelect.value = windCategory
 				this.data.velocidadeVento = windCategory
 			}
 
@@ -320,11 +312,11 @@ export class StepPool {
                 return
             }
 
+            // isPrainha é derivado pelo backend (Sanitizer) a partir da profundidade.
             this.data.areas = this.areas.map(area => ({
                 comprimento: parseFloat(area.comprimento),
                 largura: parseFloat(area.largura),
-                profundidade: parseFloat(area.profundidade),
-                isPrainha: parseFloat(area.profundidade) < 0.6
+                profundidade: parseFloat(area.profundidade)
             }))
 
             onNext(this.data)

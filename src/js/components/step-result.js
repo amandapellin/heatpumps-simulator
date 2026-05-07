@@ -21,7 +21,7 @@ export class StepResult {
 				uf_cidade: this.locationData.state_city,
 				areas: this.poolData.areas,
 				tanqueCompensacao: this.poolData.tanqueCompensacao || 'nao',
-				tipoUtilizacao: this.poolData.tipoUtilizacao || 'residencial',
+				tipoUtilizacao: this.poolData.tipoUtilizacao || 'privada',
 				utilizacaoAnual: this.poolData.utilizacaoAnual || 'ano_inteiro',
 				utilizacaoMensal: this.poolData.utilizacaoMensal || 'finais_de_semana',
 				localizacaoPiscina: this.poolData.localizacaoPiscina || 'externa',
@@ -93,10 +93,11 @@ export class StepResult {
 						<p class="eco-result-text"><strong>Consumo estimado do primeiro aquecimento:</strong> ${fmtKwh(kwh)}</p>
 						<p class="eco-result-text"><strong>Custo estimado do primeiro aquecimento:</strong> <span style="white-space: nowrap">${fmtBRL(cost)}</span></p>
 					</div>
+					${economiaPercent !== null ? `
 					<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1); margin-bottom: 0;">
 						<i data-lucide="leaf"></i>
 						<p class="eco-result-text"><strong>Economia de energia:</strong> Até ${economiaPercent}% comparado a aquecedores elétricos.</p>
-					</div>
+					</div>` : ''}
 				</div>
 			</div>
 		`
@@ -152,29 +153,35 @@ export class StepResult {
 			return m === 0 ? `${h} horas` : `${h}h ${m}min`
 		}
 
-		const heatPumpAnnual = comparison?.heatPumpHot?.annual ?? 0
-		const eletricaAnnual = comparison?.eletrica?.annual ?? 0
-		const economiaPercent = (eletricaAnnual > 0 && heatPumpAnnual > 0 && heatPumpAnnual < eletricaAnnual)
-			? Math.round(((eletricaAnnual - heatPumpAnnual) / eletricaAnnual) * 100)
-			: null
+		const eletricaAnnual  = comparison?.eletrica?.annual      ?? 0
+		const heatPumpHotAnnual  = comparison?.heatPumpHot?.annual  ?? 0
+		const heatPumpColdAnnual = comparison?.heatPumpCold?.annual ?? 0
 
-		const hotKwh  = comparison?.heatPumpHot?.firstHeatingKwh  ?? 0
-		const coldKwh = comparison?.heatPumpCold?.firstHeatingKwh ?? 0
+		const calcEconomia = (annual) =>
+			(eletricaAnnual > 0 && annual > 0 && annual < eletricaAnnual)
+				? Math.round(((eletricaAnnual - annual) / eletricaAnnual) * 100)
+				: null
+
+		const economiaPercentHot  = calcEconomia(heatPumpHotAnnual)
+		const economiaPercentCold = calcEconomia(heatPumpColdAnnual)
+
+		const hotKwh   = comparison?.heatPumpHot?.firstHeatingKwh   ?? 0
+		const coldKwh  = comparison?.heatPumpCold?.firstHeatingKwh  ?? 0
 		const hotCost  = comparison?.heatPumpHot?.firstHeatingCost  ?? 0
 		const coldCost = comparison?.heatPumpCold?.firstHeatingCost ?? 0
 
-		const commonArgs = { economiaPercent, fmtTime, fmtKwh, fmtBRL }
+		const commonArgs = { fmtTime, fmtKwh, fmtBRL }
 
 		if (combinations?.hot && combinations?.cold) {
 			return `
-				${this.renderPumpCard({ imgUrl: combinations.hot.pump.img_url,  modelo: `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: combinations.hot.heatingTime,  kwh: hotKwh,  cost: hotCost,  ...commonArgs })}
-				${this.renderPumpCard({ imgUrl: combinations.cold.pump.img_url, modelo: `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: combinations.cold.heatingTime, kwh: coldKwh, cost: coldCost, ...commonArgs })}
+				${this.renderPumpCard({ imgUrl: combinations.hot.pump.img_url,  modelo: `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: combinations.hot.heatingTime,  kwh: hotKwh,  cost: hotCost,  economiaPercent: economiaPercentHot,  ...commonArgs })}
+				${this.renderPumpCard({ imgUrl: combinations.cold.pump.img_url, modelo: `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: combinations.cold.heatingTime, kwh: coldKwh, cost: coldCost, economiaPercent: economiaPercentCold, ...commonArgs })}
 			`
 		}
 
 		return `
-			${pumpHot  ? this.renderPumpCard({ imgUrl: pumpHot.img_url,  modelo: pumpHot.modelo,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: heatingTimes.hot,  kwh: hotKwh,  cost: hotCost,  ...commonArgs }) : ''}
-			${pumpCold ? this.renderPumpCard({ imgUrl: pumpCold.img_url, modelo: pumpCold.modelo, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: heatingTimes.cold, kwh: coldKwh, cost: coldCost, ...commonArgs }) : ''}
+			${pumpHot  ? this.renderPumpCard({ imgUrl: pumpHot.img_url,  modelo: pumpHot.modelo,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: heatingTimes.hot,  kwh: hotKwh,  cost: hotCost,  economiaPercent: economiaPercentHot,  ...commonArgs }) : ''}
+			${pumpCold ? this.renderPumpCard({ imgUrl: pumpCold.img_url, modelo: pumpCold.modelo, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: heatingTimes.cold, kwh: coldKwh, cost: coldCost, economiaPercent: economiaPercentCold, ...commonArgs }) : ''}
 		`
 	}
 
@@ -275,9 +282,8 @@ export class StepResult {
 			}
 		})
 
-		setTimeout(() => {
-        	this.renderChart()
-    	}, 100)
+		// Aguarda o próximo frame para garantir que o canvas tenha dimensões computadas.
+		requestAnimationFrame(() => this.renderChart())
 	}
 
 	renderChart(overrideOptions = {}) {
@@ -603,7 +609,11 @@ export class StepResult {
 		this.renderChart(hiResOptions)
 		this.renderMonthlyChart(hiResOptions)
 
-		await new Promise(resolve => setTimeout(resolve, 600))
+		// Aguarda dois frames para o Chart.js terminar resize+repaint em hi-res
+		// (animation: false já elimina a necessidade de espera arbitrária).
+		await new Promise(resolve =>
+			requestAnimationFrame(() => requestAnimationFrame(resolve))
+		)
 
 		const barChartImg = this.chart?.toBase64Image('image/png', 1) || null
 		const lineChartImg = this.monthlyChart?.toBase64Image('image/png', 1) || null
@@ -630,99 +640,4 @@ export class StepResult {
 		return { barChartImg, lineChartImg }
 	}
 
-	renderTable() {
-		if (!this.results || !this.results.comparison) {
-			return ''
-		}
-
-		const { comparison } = this.results
-		const { hotLabel, coldLabel } = this._getPumpLabels()
-		const months = comparison.monthNames || [
-			'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-			'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-		]
-
-		const fmt = (value) => {
-			if (value == null || isNaN(value)) return '-'
-			return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-		}
-
-		const fmtCurrency = (value) => {
-			if (value == null || isNaN(value)) return '-'
-			return `R$ ${fmt(value)}`
-		}
-
-		const sumArray = (arr) => (arr || []).reduce((a, b) => a + b, 0)
-
-		let tbodyRows = ''
-		for (let i = 0; i < 12; i++) {
-			tbodyRows += `
-				<tr>
-					<td>${months[i]}</td>
-					<td>${fmt(comparison.heatPumpHot.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.heatPumpHot.monthlyBreakdown[i])}</td>
-					<td>${fmt(comparison.heatPumpCold.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.heatPumpCold.monthlyBreakdown[i])}</td>
-					<td>${fmt(comparison.eletrica.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.eletrica.monthlyBreakdown[i])}</td>
-					<td>${fmt(comparison.gn.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.gn.monthlyBreakdown[i])}</td>
-					<td>${fmt(comparison.pellet.consumption[i])}</td>
-					<td>${fmtCurrency(comparison.pellet.monthlyBreakdown[i])}</td>
-				</tr>
-			`
-		}
-
-		return `
-			<div class="eco-results-comparison-table" style="display: none;">
-				<h3 class="eco-results-chart-title">Comparativo Mensal de Custos de Operação</h3>
-				<p class="eco-result-text">Análise detalhada dos custos mensais associados a diferentes métodos de aquecimento de piscinas.</p>
-				<div class="eco-results-table-wrapper">
-					<table class="eco-comparison-table">
-						<thead>
-							<tr>
-								<th></th>
-								<th colspan="2">${hotLabel}</th>
-								<th colspan="2">${coldLabel}</th>
-								<th colspan="2">Resistência</th>
-								<th colspan="2">Gás Natural</th>
-								<th colspan="2">Pellet</th>
-							</tr>
-							<tr>
-								<th>Mês</th>
-								<th>Consumo (kWh)</th>
-								<th>Custo</th>
-								<th>Consumo (kWh)</th>
-								<th>Custo</th>
-								<th>Consumo (kWh)</th>
-								<th>Custo</th>
-								<th>Consumo (m³)</th>
-								<th>Custo</th>
-								<th>Consumo (kg)</th>
-								<th>Custo</th>
-							</tr>
-						</thead>
-						<tbody>
-							${tbodyRows}
-						</tbody>
-						<tfoot>
-							<tr>
-								<td><strong>Total Anual</strong></td>
-								<td><strong>${fmt(sumArray(comparison.heatPumpHot.consumption))} kWh</strong></td>
-								<td><strong>${fmtCurrency(comparison.heatPumpHot.annual)}</strong></td>
-								<td><strong>${fmt(sumArray(comparison.heatPumpCold.consumption))} kWh</strong></td>
-								<td><strong>${fmtCurrency(comparison.heatPumpCold.annual)}</strong></td>
-								<td><strong>${fmt(sumArray(comparison.eletrica.consumption))} kWh</strong></td>
-								<td><strong>${fmtCurrency(comparison.eletrica.annual)}</strong></td>
-								<td><strong>${fmt(sumArray(comparison.gn.consumption))} m³</strong></td>
-								<td><strong>${fmtCurrency(comparison.gn.annual)}</strong></td>
-								<td><strong>${fmt(sumArray(comparison.pellet.consumption))} kg</strong></td>
-								<td><strong>${fmtCurrency(comparison.pellet.annual)}</strong></td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
-			</div>
-		`
-	}
 }
