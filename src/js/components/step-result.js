@@ -1,5 +1,8 @@
 import Chart from 'chart.js/auto'
 
+// Divisor kJ/h -> BTU/h. Espelha App\Utils\Constants::KJ_TO_BTU no backend.
+const KJ_TO_BTU = 1.055
+
 export class StepResult {
 	constructor(locationData, poolData, apiService) {
     	this.locationData = locationData
@@ -200,7 +203,7 @@ export class StepResult {
 						<div class="eco-results-list">
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
 								<i data-lucide="info"></i>
-								<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>60 horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / 1.055).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
+								<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>60 horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
 							</div>
 							${this.renderCards()}
 						</div>
