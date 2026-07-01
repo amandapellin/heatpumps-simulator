@@ -114,7 +114,7 @@ export class StepPool {
                 </div>
                 <div class="eco-area-prainha-badge${this._isPrainhaDepth(area.profundidade) ? ' is-visible' : ''}" data-prainha-badge="${area.id}">
                     <i data-lucide="waves"></i>
-                    <span>Esta área será tratada como <strong>prainha</strong> (parte rasa, profundidade &lt; ${PRAINHA_DEPTH.toLocaleString('pt-BR')} m) e não entra no volume da piscina.</span>
+                    <span>Esta área será tratada como <strong>prainha</strong> (parte rasa, profundidade &lt; ${PRAINHA_DEPTH} m).</span>
                 </div>
             </div>
         `).join('')
