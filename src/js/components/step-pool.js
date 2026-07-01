@@ -1,6 +1,10 @@
 import { createIcons, icons } from '../../main.js'
 import { showToast } from '../toast.js'
 
+// Profundidade (m) abaixo da qual uma área é tratada como prainha.
+// Espelha App\Utils\Constants::PRAINHA_DEPTH no backend.
+const PRAINHA_DEPTH = 0.6
+
 export class StepPool {
 	constructor(apiService, locationData) {
 		this.apiService = apiService
@@ -65,6 +69,20 @@ export class StepPool {
         this.renderAreas()
     }
 
+    // Uma área é prainha quando a profundidade informada é positiva e menor que o limiar.
+    _isPrainhaDepth(profundidade) {
+        const d = parseFloat(profundidade)
+        return !isNaN(d) && d > 0 && d < PRAINHA_DEPTH
+    }
+
+    // Mostra/oculta o selo de prainha do card conforme a profundidade digitada.
+    updatePrainhaBadge(areaId) {
+        const area = this.areas.find(a => a.id === areaId)
+        const badge = document.querySelector(`[data-prainha-badge="${areaId}"]`)
+        if (!area || !badge) return
+        badge.classList.toggle('is-visible', this._isPrainhaDepth(area.profundidade))
+    }
+
     renderAreas() {
         const container = document.querySelector('#poolAreasContainer')
         if (!container) return
@@ -94,6 +112,10 @@ export class StepPool {
                             value="${area.profundidade}" placeholder="Ex: 1.5" step="0.1" min="0">
                     </div>
                 </div>
+                <div class="eco-area-prainha-badge${this._isPrainhaDepth(area.profundidade) ? ' is-visible' : ''}" data-prainha-badge="${area.id}">
+                    <i data-lucide="waves"></i>
+                    <span>Esta área será tratada como <strong>prainha</strong> (parte rasa, profundidade &lt; ${PRAINHA_DEPTH.toLocaleString('pt-BR')} m) e não entra no volume da piscina.</span>
+                </div>
             </div>
         `).join('')
 
@@ -118,6 +140,9 @@ export class StepPool {
                 const area = this.areas.find(a => a.id === areaId)
                 if (area) {
                     area[field] = e.target.value
+                    if (field === 'profundidade') {
+                        this.updatePrainhaBadge(areaId)
+                    }
                 }
             })
         })

@@ -374,6 +374,33 @@ body {
     gap: 1rem;
 }
 
+/* Selo dinâmico: indica que a área será tratada como prainha (< 0,60 m). */
+.eco-area-prainha-badge {
+    display: none;
+    align-items: center;
+    gap: 0.625rem;
+    margin-top: 1rem;
+    padding: 0.625rem 0.875rem;
+    background: rgba(175, 227, 39, 0.12);
+    border-left: 3px solid var(--green-triplob);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--cinza-escuro);
+    line-height: 1.4;
+}
+.eco-area-prainha-badge.is-visible {
+    display: flex;
+}
+.eco-area-prainha-badge strong {
+    color: var(--verde-escuro);
+}
+.eco-area-prainha-badge svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--verde-escuro);
+    flex-shrink: 0;
+}
+
 .eco-pool-body {
     padding: 2rem 2.5rem 1.5rem;
     display: flex;
