@@ -1,4 +1,5 @@
 import Chart from 'chart.js/auto'
+import { showToast } from '../toast.js'
 
 // Divisor kJ/h -> BTU/h. Espelha App\Utils\Constants::KJ_TO_BTU no backend.
 const KJ_TO_BTU = 1.055
@@ -593,7 +594,7 @@ export class StepResult {
 			window.URL.revokeObjectURL(url)
 		} catch (error) {
 			console.error('Erro ao gerar PDF:', error)
-			alert('Erro ao gerar o relatório PDF. Tente novamente.')
+			showToast('Erro ao gerar o relatório PDF. Tente novamente.', 'error')
 		} finally {
 			btnDownload.disabled = false
 			btnDownload.innerHTML = originalHTML

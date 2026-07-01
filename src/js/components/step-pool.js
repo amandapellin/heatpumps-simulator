@@ -1,4 +1,5 @@
 import { createIcons, icons } from '../../main.js'
+import { showToast } from '../toast.js'
 
 export class StepPool {
 	constructor(apiService, locationData) {
@@ -290,7 +291,7 @@ export class StepPool {
 
         btnNext?.addEventListener('click', () => {
             if (this.areas.length === 0) {
-                alert('Por favor, adicione pelo menos uma área de piscina')
+                showToast('Por favor, adicione pelo menos uma área de piscina.', 'warning')
                 return
             }
 
@@ -299,12 +300,12 @@ export class StepPool {
             )
 
             if (invalidArea) {
-                alert('Por favor, preencha todos os campos das áreas adicionadas')
+                showToast('Por favor, preencha todos os campos das áreas adicionadas.', 'warning')
                 return
             }
 
             if (parseFloat(this.data.temperaturaDesejada) <= parseFloat(this.data.temperaturaInicial)) {
-                alert('A temperatura desejada deve ser maior que a temperatura inicial')
+                showToast('A temperatura desejada deve ser maior que a temperatura inicial.', 'warning')
                 return
             }
 

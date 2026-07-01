@@ -1,3 +1,5 @@
+import { showToast } from '../toast.js'
+
 export class StepLocation {
     constructor(apiService){
         this.apiService = apiService
@@ -25,7 +27,7 @@ export class StepLocation {
             }
         } catch (error) {
             console.error('Erro ao carregar estados:', error);
-            alert('Não foi possível carregar os estados. Tente novamente mais tarde.')
+            showToast('Não foi possível carregar os estados. Tente novamente mais tarde.', 'error')
         }
     }
 
@@ -60,7 +62,7 @@ export class StepLocation {
             }
         } catch (error) {
             console.error('Erro ao carregar cidades:', error);
-            alert('Não foi possível carregar as cidades. Tente novamente mais tarde.')
+            showToast('Não foi possível carregar as cidades. Tente novamente mais tarde.', 'error')
         }
     }
     async loadClimateData(state_city) {
@@ -83,7 +85,7 @@ export class StepLocation {
             return this.climateData
         } catch (error) {
             console.error('Erro ao carregar dados climáticos:', error);
-            alert('Não foi possível carregar os dados climáticos. Tente novamente mais tarde.')
+            showToast('Não foi possível carregar os dados climáticos. Tente novamente mais tarde.', 'error')
         }
     }
     showLocationInfo() {
@@ -185,7 +187,7 @@ export class StepLocation {
             if (this.data.state && this.data.city && this.data.state_city) {
                 onNext(this.data)
             } else {
-                alert('Por favor, selecione estado e cidade')
+                showToast('Por favor, selecione estado e cidade.', 'warning')
             }
         })
 
