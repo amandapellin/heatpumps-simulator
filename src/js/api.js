@@ -50,8 +50,12 @@ export class ApiService {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Erro ao executar simulação');
+                const errorData = await response.json().catch(() => ({}));
+                // A validação do backend retorna `errors` (array); demais erros usam `error`.
+                const message = Array.isArray(errorData.errors) && errorData.errors.length
+                    ? errorData.errors.join(' ')
+                    : (errorData.error || 'Erro ao executar simulação');
+                throw new Error(message);
             }
 
             return await response.json();

@@ -25,13 +25,9 @@ export class StepPool {
   	}
 	async loadClimateData() {
 		try {
-			console.log('Location Data recebido:', this.locationData)
-			console.log('Buscando clima para state_city:', this.locationData.state_city)
-
 			const response = await this.apiService.getClimateData(this.locationData.state_city)
 			this.climateData = response.data || response // Extrair data da resposta
-			console.log('Dados climáticos:', this.climateData)
-		
+
 			const tempInfo = document.querySelector('#tempInfo')
 			if (tempInfo && this.climateData.temp_minima) {
 				tempInfo.textContent = `Temperatura Ambiente média mais baixa do ano ${this.climateData.temp_minima}°C.`

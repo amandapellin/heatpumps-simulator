@@ -53,7 +53,9 @@ export class StepLocation {
                     this.cities.map(city => {
                         const cityName = typeof city === 'object' ? city.cidade : String(city)
                         const cityNameFormatted = this.capitalizeWords(cityName)
-                        return `<option value="${cityNameFormatted}">${cityNameFormatted}</option>`
+                        // value = nome cru (compõe a chave uf_cidade usada na busca do
+                        // backend); apenas o texto exibido é formatado.
+                        return `<option value="${cityName}">${cityNameFormatted}</option>`
                     }).join('')
             }
         } catch (error) {

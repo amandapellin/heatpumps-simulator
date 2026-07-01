@@ -3,6 +3,10 @@ import Chart from 'chart.js/auto'
 // Divisor kJ/h -> BTU/h. Espelha App\Utils\Constants::KJ_TO_BTU no backend.
 const KJ_TO_BTU = 1.055
 
+// Tempo-base do primeiro aquecimento (horas). Espelha
+// App\Utils\Constants::HEATING_TIME_BASE no backend.
+const HEATING_TIME_BASE_HOURS = 60
+
 export class StepResult {
 	constructor(locationData, poolData, apiService) {
     	this.locationData = locationData
@@ -29,7 +33,7 @@ export class StepResult {
 				utilizacaoMensal: this.poolData.utilizacaoMensal || 'finais_de_semana',
 				localizacaoPiscina: this.poolData.localizacaoPiscina || 'externa',
 				utilizacaoCapaTermica: this.poolData.utilizacaoCapaTermica || 'nao',
-				velocidadeVento: this.poolData.velocidadeVento || 'medio',
+				velocidadeVento: this.poolData.velocidadeVento || 'sem_vento',
 				reabastecimentoDiario: parseFloat(this.poolData.reabastecimentoDiario || 0),
 				temperaturaDesejada: parseFloat(this.poolData.temperaturaDesejada || 32),
 				temperaturaInicial: parseFloat(this.poolData.temperaturaInicial || 20),
@@ -38,13 +42,10 @@ export class StepResult {
 				dispositivoHidromassagem: parseInt(this.poolData.dispositivoHidromassagem || 0)
 			}
 
-			console.log('Enviando dados para simulação:', simulationData)
-
 			const response = await this.apiService.runSimulation(simulationData)
 
 			if (response.success) {
 				this.results = response.data
-				console.log('Resultados da simulação:', this.results)
 			} else {
 				throw new Error(response.error || 'Erro ao processar simulação')
 			}
@@ -57,16 +58,23 @@ export class StepResult {
 			throw error
 		}
 	}
+	// Rótulo de uma combinação de bombas. Omite o prefixo "N× " quando é 1 unidade.
+	_comboLabel(combo) {
+		if (!combo) return null
+		const prefix = combo.quantity > 1 ? `${combo.quantity}× ` : ''
+		return `${prefix}${combo.pump.modelo}`
+	}
+
 	_getPumpLabels() {
 		const combinations = this.results?.pumpCombinations
 		const hasCombinations = combinations?.hot && combinations?.cold
 
 		const hotLabel = hasCombinations
-			? `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`
+			? this._comboLabel(combinations.hot)
 			: (this.results?.recommendedPumpHot?.modelo ?? 'Bomba ECOPOOL (quente)')
 
 		const coldLabel = hasCombinations
-			? `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`
+			? this._comboLabel(combinations.cold)
 			: (this.results?.recommendedPumpCold?.modelo ?? 'Bomba ECOPOOL (fria)')
 
 		return { hotLabel, coldLabel }
@@ -177,8 +185,8 @@ export class StepResult {
 
 		if (combinations?.hot && combinations?.cold) {
 			return `
-				${this.renderPumpCard({ imgUrl: combinations.hot.pump.img_url,  modelo: `${combinations.hot.quantity}× ${combinations.hot.pump.modelo}`,  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: combinations.hot.heatingTime,  kwh: hotKwh,  cost: hotCost,  economiaPercent: economiaPercentHot,  ...commonArgs })}
-				${this.renderPumpCard({ imgUrl: combinations.cold.pump.img_url, modelo: `${combinations.cold.quantity}× ${combinations.cold.pump.modelo}`, badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: combinations.cold.heatingTime, kwh: coldKwh, cost: coldCost, economiaPercent: economiaPercentCold, ...commonArgs })}
+				${this.renderPumpCard({ imgUrl: combinations.hot.pump.img_url,  modelo: this._comboLabel(combinations.hot),  badgeClass: 'eco-results-warm', badgeIcon: 'thermometer-sun',       badgeLabel: 'Ideal para regiões mais quentes.', heatingTime: combinations.hot.heatingTime,  kwh: hotKwh,  cost: hotCost,  economiaPercent: economiaPercentHot,  ...commonArgs })}
+				${this.renderPumpCard({ imgUrl: combinations.cold.pump.img_url, modelo: this._comboLabel(combinations.cold), badgeClass: 'eco-results-cold', badgeIcon: 'thermometer-snowflake', badgeLabel: 'Ideal para regiões mais frias.',   heatingTime: combinations.cold.heatingTime, kwh: coldKwh, cost: coldCost, economiaPercent: economiaPercentCold, ...commonArgs })}
 			`
 		}
 
@@ -203,7 +211,7 @@ export class StepResult {
 						<div class="eco-results-list">
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
 								<i data-lucide="info"></i>
-								<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>60 horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
+								<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>${HEATING_TIME_BASE_HOURS} horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
 							</div>
 							${this.renderCards()}
 						</div>

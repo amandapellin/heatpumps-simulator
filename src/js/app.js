@@ -103,7 +103,6 @@ export class App{
 			case 1:
 				this.stepLocation.bindEvents((data) => {
 					this.locationData = data
-					console.log('Dados de localização:', data)
 					this.goToNextStep()
 				})
 				break
@@ -112,7 +111,6 @@ export class App{
 				this.stepPool.bindEvents(
 					(data) => {
 						this.poolData = data
-						console.log('Dados da piscina:', data)
 						this.goToNextStep()
 					},
 					() => {
