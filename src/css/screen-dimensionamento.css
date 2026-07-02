@@ -191,3 +191,7 @@
     .dim-grid { grid-template-columns: 1fr; }
     .dim-viz-card { position: static; }
 }
+@media (max-width: 480px) {
+    .dim-metrics { grid-template-columns: 1fr 1fr; }
+    .eco-page { padding: 0 12px 32px; }
+}
