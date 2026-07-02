@@ -291,6 +291,31 @@
 }
 .dim-footer-title { margin: 0 0 4px; color: #fff; font-size: 1.05rem; }
 .dim-page-footer p { margin: 0; color: var(--bege, #faf3e9); font-size: 0.9rem; }
+/* botão do rodapé compacto (o .eco-btn base é full-width e alto) */
+.dim-page-footer .eco-btn {
+    width: auto;
+    height: auto;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+    box-shadow: none;
+    flex: 0 0 auto;
+}
+
+/* itens de economia empilhados (card do 1º gráfico, antes eram grid 2 col) */
+.dim-results .eco-results-chart-info { grid-template-columns: 1fr; gap: 0.6rem; }
+
+/* infos das bombas: menor altura e fonte */
+.dim-results .eco-results-card-body { gap: 0.5rem; }
+.dim-results .eco-results-card-body .eco-pool-info {
+    padding: 0.55rem 0.75rem;
+    gap: 0.6rem;
+    border-left-width: 5px;
+    margin-bottom: 0;
+}
+.dim-results .eco-results-card-body .eco-result-text { font-size: 0.8rem; line-height: 1.35; }
+
+/* ações da Tela 2 com botões do tamanho do conteúdo */
+.dim-results-actions .eco-btn { width: auto; }
 
 @media (max-width: 900px) {
     .dim-grid { grid-template-columns: 1fr; }
