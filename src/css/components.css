@@ -599,7 +599,7 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem;
+    padding: 0.8rem;
     background-color: var(--elements-webflow-library--neutral--100);
     border-radius: 0.5rem;
     border: 1px solid var(--cinza-claro);
@@ -646,13 +646,13 @@ body {
 }
 
 .eco-result-chart-icon{
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     flex-shrink: 0;
     color: var(--green-triplob);
 }
 .eco-result-text-value {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--verde-titulos);
     margin: 0;

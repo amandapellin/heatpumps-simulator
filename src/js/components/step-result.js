@@ -228,13 +228,14 @@ export class StepResult {
 								<div style="position: relative; height: 340px; width: 100%;"><canvas id="monthlyComparisonChart"></canvas></div>
 							</div>
 						</div>
+						<p class="dim-disclaimer">
+							<i data-lucide="info"></i>
+							Os custos estimados são baseados em simulações e podem variar conforme condições reais de uso, tarifas e outros fatores.
+						</p>
 					</div>
 				</div>
 
-				<p class="dim-disclaimer">
-					<i data-lucide="info"></i>
-					Os custos estimados são baseados em simulações e podem variar conforme condições reais de uso, tarifas e outros fatores.
-				</p>
+
 
 				<div class="dim-results-actions">
 					<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">← Voltar</button>
