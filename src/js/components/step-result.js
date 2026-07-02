@@ -231,6 +231,11 @@ export class StepResult {
 					</div>
 				</div>
 
+				<p class="dim-disclaimer">
+					<i data-lucide="info"></i>
+					Os custos estimados são baseados em simulações e podem variar conforme condições reais de uso, tarifas e outros fatores.
+				</p>
+
 				<div class="dim-results-actions">
 					<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">← Voltar</button>
 					<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnDownload">

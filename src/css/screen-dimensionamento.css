@@ -317,6 +317,19 @@
 /* ações da Tela 2 com botões do tamanho do conteúdo */
 .dim-results-actions .eco-btn { width: auto; }
 
+/* disclaimer após os gráficos */
+.dim-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--cinza-escuro, #666);
+    font-style: italic;
+}
+.dim-disclaimer svg { width: 15px; height: 15px; flex: 0 0 auto; margin-top: 2px; color: var(--verde-claro, #006f73); }
+
 @media (max-width: 900px) {
     .dim-grid { grid-template-columns: 1fr; }
     .dim-viz-card { position: static; }
