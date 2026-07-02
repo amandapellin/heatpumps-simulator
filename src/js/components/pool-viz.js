@@ -189,7 +189,12 @@ export class PoolViz {
 			this._chip(m.px + ox, m.py + oy, 'CAPA TÉRMICA', '#3c5a12', '#eef7e0')
 		}
 
-		// cascata na parede do comprimento (3-2-6-7)
+		// paredes externas frontais (sombreadas) — ocluem o interior frontal
+		scene.appendChild(el('polygon', { points: pts([1, 2, 6, 5]), fill: 'url(#pvWallO)' }))
+		scene.appendChild(el('polygon', { points: pts([3, 2, 6, 7]), fill: 'url(#pvWallO2)' }))
+
+		// cascata na parede do COMPRIMENTO (esquerda, face 3-2-6-7) — desenhada
+		// sobre a parede para ficar visível.
 		if (cascata > 0) {
 			this.clipCascPoly.setAttribute('points', pts([3, 2, 6, 7]))
 			const gc = el('g', { 'clip-path': 'url(#pvClipCasc)' })
@@ -208,11 +213,7 @@ export class PoolViz {
 			scene.appendChild(gc)
 		}
 
-		// paredes externas frontais (sombreadas) — ocluem o interior frontal
-		scene.appendChild(el('polygon', { points: pts([1, 2, 6, 5]), fill: 'url(#pvWallO)' }))
-		scene.appendChild(el('polygon', { points: pts([3, 2, 6, 7]), fill: 'url(#pvWallO2)' }))
-
-		// borda infinita: transbordo na aresta frontal direita (1-2)
+		// borda infinita: transbordo na parede da LARGURA (direita, aresta 1-2)
 		if (borda > 0) {
 			scene.appendChild(el('line', { x1: P[1].x, y1: P[1].y, x2: P[2].x, y2: P[2].y, stroke: '#d9f7ff', 'stroke-width': 3, 'stroke-opacity': .95 }))
 			const dx = (P[5].x - P[1].x) * .55, dy = (P[5].y - P[1].y) * .55

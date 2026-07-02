@@ -244,10 +244,12 @@ export class ScreenDimensionamento {
 						<div class="dim-card">
 							<div class="dim-card-head"><span class="dim-ic">📍</span><h3>Localização</h3></div>
 							<div class="dim-card-b">
-								<div class="eco-form-group"><label class="eco-label" for="state">Estado</label>
-									<select class="eco-select" id="state"><option value="">Selecione o estado</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="city">Cidade</label>
-									<select class="eco-select" id="city" disabled><option value="">Selecione a cidade</option></select></div>
+								<div class="dim-row2">
+									<div class="eco-form-group"><label class="eco-label" for="state">Estado</label>
+										<select class="eco-select" id="state"><option value="">Selecione o estado</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="city">Cidade</label>
+										<select class="eco-select" id="city" disabled><option value="">Selecione a cidade</option></select></div>
+								</div>
 								<div class="dim-chips" id="climateChips"></div>
 							</div>
 						</div>

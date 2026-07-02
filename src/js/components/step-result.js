@@ -199,15 +199,12 @@ export class StepResult {
 
 	render() {
 		return `
-			<div class="eco-container">
-				<div class="eco-card">
-					<div class="eco-header">
-                        <div class="eco-card-icon">
-                            <i data-lucide="circle-check-big"></i>
-                        </div>
-                        <h2 class="eco-card-title">Resultados</h2>
-                        <p class="eco-card-subtitle">Com base nos dados informados, estas são as melhores opções para atender às suas necessidades.</p>
-                    </div>
+			<div class="eco-container dim-results">
+				<div class="dim-head">
+					<h2 class="dim-title">Resultados</h2>
+					<p class="dim-subtitle">Com base nos dados informados, estas são as melhores opções para atender às suas necessidades.</p>
+				</div>
+				<div class="eco-card dim-results-card">
 					<div class="eco-results-body">
 						<div class="eco-results-list">
 							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">

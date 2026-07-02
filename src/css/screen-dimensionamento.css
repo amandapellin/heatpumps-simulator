@@ -53,24 +53,31 @@
     align-items: start;
 }
 
-/* Dentro do dashboard os controles precisam encolher para caber na coluna
-   (os inputs/selects do design system não têm width definido). */
-.dim-grid .eco-form-group { min-width: 0; }
+/* Dentro do dashboard os controles encolhem para caber na coluna e ficam mais
+   compactos (menor altura e espaçamentos) do que no restante do app. */
+.dim-grid .eco-form-group { min-width: 0; gap: 5px; }
+.dim-grid .eco-label { font-size: 0.82rem; }
 .dim-grid .eco-input,
-.dim-grid .eco-select { width: 100%; min-width: 0; }
+.dim-grid .eco-select {
+    width: 100%;
+    min-width: 0;
+    height: 2.6rem;
+    padding: 0 0.85rem;
+    border-width: 1.5px;
+    border-radius: 0.6rem;
+    font-size: 0.95rem;
+}
+.dim-grid .eco-pool-parameters { gap: 12px 14px; }
 .dim-grid .eco-area-fields { gap: 10px; }
+.dim-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dim-col {
     display: flex;
     flex-direction: column;
     gap: 16px;
     min-width: 0;
 }
-.dim-viz-card {
-    position: sticky;
-    top: 16px;
-    padding: 0;
-    overflow: hidden;
-}
+/* a viz acompanha o scroll do formulário (sem fixar) */
+.dim-viz-card { overflow: hidden; }
 
 /* cards no estilo do protótipo (contêiner enxuto com cabeçalho ícone+título) */
 .dim-card {
@@ -80,7 +87,10 @@
     box-shadow: 0 1px 2px rgba(20, 20, 43, 0.05), 0 16px 34px -24px rgba(0, 53, 59, 0.33);
     overflow: hidden;
 }
-.dim-card-b { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.dim-card-b { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+/* card de área mais compacto dentro do dashboard */
+.dim-grid .eco-area-card { padding: 12px; margin: 0; }
+.dim-grid .eco-area-header { margin-bottom: 8px; }
 
 .dim-card-head {
     display: flex;
@@ -225,30 +235,39 @@
     gap: 8px;
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1px solid var(--cinza-claro, #e0e0e0);
-    background: #fff;
-    color: var(--verde-medio, #004d56);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--bege, #faf3e9);
 }
 .eco-step.is-on {
+    background: var(--green-triplob, #afe327);
+    border-color: var(--green-triplob, #afe327);
     color: var(--verde-escuro, #00353b);
-    box-shadow: inset 0 0 0 1px var(--verde-claro, #006f73);
-    border-color: var(--verde-claro, #006f73);
 }
 .eco-step .n {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--cinza-extra-claro, #f5f5f5);
+    background: rgba(255, 255, 255, 0.18);
     display: grid;
     place-items: center;
     font-size: 12px;
-    color: var(--cinza-escuro, #666);
+    color: var(--bege, #faf3e9);
 }
 .eco-step.is-on .n {
     background: var(--verde-escuro, #00353b);
     color: var(--green-triplob, #afe327);
 }
-.eco-step-sep { width: 20px; height: 1px; background: var(--cinza-claro, #e0e0e0); }
+.eco-step-sep { width: 20px; height: 1px; background: rgba(255, 255, 255, 0.3); }
+
+/* Tela 2 (Resultados) — coerência visual com o formulário */
+.eco-container.dim-results { max-width: 1080px; }
+.dim-results .dim-head { margin-bottom: 14px; }
+.dim-results-card {
+    border: 1px solid var(--cinza-claro, #e0e0e0);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(20, 20, 43, 0.05), 0 16px 34px -24px rgba(0, 53, 59, 0.33);
+}
 
 @media (max-width: 900px) {
     .dim-grid { grid-template-columns: 1fr; }
