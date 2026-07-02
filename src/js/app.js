@@ -1,20 +1,24 @@
 import logoEcopool from "../assets/images/logo-ecopool.png"
-import { StepLocation } from "./components/step-location.js"
-import { StepPool } from "./components/step-pool.js"
+import { ScreenDimensionamento } from "./components/screen-dimensionamento.js"
 import { StepResult } from "./components/step-result.js"
 import { ApiService } from "./api.js"
 import { createIcons, icons } from '../main.js'
-export class App{
-		
-	constructor(containerSelector){
-		this.container = document.querySelector(containerSelector)
-		this.currentStep = 1
-		this.locationData = null
-		this.poolData = null
 
-		this.apiService = new ApiService() // Usa variável de ambiente automaticamente
-		this.stepLocation = new StepLocation(this.apiService)
-		this.stepPool = null
+/**
+ * App — fluxo em 2 telas:
+ *   Tela 1 (Dimensionamento): localização + piscina + visualização 3D ao vivo.
+ *   Tela 2 (Resultados): bombas recomendadas + comparativos (StepResult).
+ *
+ * As duas telas coexistem no DOM (mostrar/ocultar), então o estado da Tela 1
+ * é preservado ao voltar dos resultados. Um novo cálculo recria a Tela 1.
+ */
+export class App {
+	constructor(containerSelector) {
+		this.container = document.querySelector(containerSelector)
+		this.apiService = new ApiService()
+		this.screenDim = new ScreenDimensionamento(this.apiService)
+		this.stepResult = null
+		this.currentScreen = 1
 	}
 
 	renderHeader() {
@@ -23,129 +27,73 @@ export class App{
 				<p>Encontre a bomba de calor ideal para sua piscina.</p>
 				<img src="${logoEcopool}" alt="Ecopool Logo">
 			</div>
-		`
+			<div class="eco-stepper" role="list">
+				<span class="eco-step is-on" data-step="1" role="listitem"><span class="n">1</span> Dimensionamento</span>
+				<span class="eco-step-sep"></span>
+				<span class="eco-step" data-step="2" role="listitem"><span class="n">2</span> Resultados</span>
+			</div>`
 	}
 
-	renderStep() {
-		switch(this.currentStep) {
-			case 1:
-				return this.stepLocation.render()
-			case 2:
-				this.stepPool = new StepPool(this.apiService, this.locationData)
-				return this.stepPool.render()
-			case 3:
-				// Criar instância do StepResult com apiService
-				this.stepResult = new StepResult(this.locationData, this.poolData, this.apiService)
-
-				// Carregar resultados da simulação assincronamente
-				this.stepResult.loadSimulationResults()
-					.then(() => {
-						// Re-renderizar após carregar dados
-						const container = document.querySelector('.eco-container')
-						if (container) {
-							container.innerHTML = this.stepResult.render()
-							this.stepResult.bindEvents(() => {
-								this.currentStep = 1
-								this.locationData = null
-								this.poolData = null
-								this.render()
-							}, () => {
-								this.goToPreviousStep()
-							})
-							// Re-criar ícones após re-renderizar
-							setTimeout(() => {
-								createIcons({icons})
-							}, 0)
-						}
-					})
-					.catch(error => {
-						console.error('Erro ao carregar resultados:', error)
-						// Re-renderizar para mostrar erro
-						const container = document.querySelector('.eco-container')
-						if (container) {
-							container.innerHTML = this.stepResult.render()
-							this.stepResult.bindEvents(() => {
-								this.currentStep = 1
-								this.locationData = null
-								this.poolData = null
-								this.render()
-							}, () => {
-								this.goToPreviousStep()
-							})
-							setTimeout(() => {
-								createIcons({icons})
-							}, 0)
-						}
-					})
-
-				// Retorna renderização inicial (loading)
-				return this.stepResult.render()
-			default:
-				return this.stepLocation.render()
-		}
-	}
-
-	render(){
+	render() {
 		this.container.innerHTML = `
 			<div class="eco-simulator">
 				${this.renderHeader()}
-				${this.renderStep()}
-			</div>
-		`
-		this.bindCurrentStepEvents()
-		setTimeout(() => {
-        	createIcons({icons})
-    	}, 0)
+				<div id="screen1-mount"></div>
+				<div id="screen2-mount" hidden></div>
+			</div>`
+		this.currentScreen = 1
+		this._mountScreen1()
+		this._refreshIcons()
 	}
 
-	bindCurrentStepEvents() {
-		switch(this.currentStep) {
-			case 1:
-				this.stepLocation.bindEvents((data) => {
-					this.locationData = data
-					this.goToNextStep()
-				})
-				break
-			
-			case 2:
-				this.stepPool.bindEvents(
-					(data) => {
-						this.poolData = data
-						this.goToNextStep()
-					},
-					() => {
-						this.goToPreviousStep()
-					}
-				)
-				break
-			
-			case 3:
-				// StepResult já foi criado em renderStep(), apenas bind dos eventos
-				if (this.stepResult) {
-					this.stepResult.bindEvents(() => {
-						this.currentStep = 1
-						this.locationData = null
-						this.poolData = null
-						this.render()
-					}, () => {
-						this.goToPreviousStep()
-					})
-				}
-				break
-		}
+	_mountScreen1() {
+		const mount = document.querySelector('#screen1-mount')
+		mount.innerHTML = this.screenDim.render()
+		this.screenDim.bindEvents((location, pool) => this.goToResults(location, pool))
 	}
 
-	goToNextStep() {
-		if (this.currentStep < 3) {
-			this.currentStep++
-			this.render()
-		}
+	goToResults(locationData, poolData) {
+		this.locationData = locationData
+		this.poolData = poolData
+		this.stepResult = new StepResult(locationData, poolData, this.apiService)
+
+		const s2 = document.querySelector('#screen2-mount')
+		s2.innerHTML = this.stepResult.render() // estado de carregamento
+		this._switchScreen(2)
+
+		this.stepResult.loadSimulationResults()
+			.then(() => this._renderResults())
+			.catch((error) => { console.error('Erro ao carregar resultados:', error); this._renderResults() })
 	}
 
-	goToPreviousStep() {
-		if (this.currentStep > 1) {
-			this.currentStep--
-			this.render()
-		}
+	_renderResults() {
+		const s2 = document.querySelector('#screen2-mount')
+		if (!s2) return
+		s2.innerHTML = this.stepResult.render()
+		this.stepResult.bindEvents(
+			() => this.reset(),
+			() => this._switchScreen(1),
+		)
+		this._refreshIcons()
+	}
+
+	reset() {
+		this.screenDim = new ScreenDimensionamento(this.apiService)
+		this.stepResult = null
+		this.render()
+	}
+
+	_switchScreen(n) {
+		this.currentScreen = n
+		document.querySelector('#screen1-mount').hidden = n !== 1
+		document.querySelector('#screen2-mount').hidden = n !== 2
+		document.querySelectorAll('.eco-step').forEach(el =>
+			el.classList.toggle('is-on', Number(el.dataset.step) === n))
+		window.scrollTo({ top: 0, behavior: 'smooth' })
+		this._refreshIcons()
+	}
+
+	_refreshIcons() {
+		setTimeout(() => createIcons({ icons }), 0)
 	}
 }
