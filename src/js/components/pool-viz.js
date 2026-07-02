@@ -251,7 +251,7 @@ export class PoolViz {
 				const q = iso(0.02 * L, W * frac, 0, s)
 				const sx = q.px + ox, sy = q.py + oy - 14
 				const wrap = el('g', { transform: `translate(${sx.toFixed(1)} ${sy.toFixed(1)}) rotate(${ang.toFixed(1)})` })
-				const arw = el('path', { d: 'M0,0 h32 M26,-4 l6,4 -6,4', fill: 'none', stroke: '#3f6b70', 'stroke-opacity': .85, 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, 'pv-wind')
+				const arw = el('path', { d: 'M0,0 h32 M26,-4 l6,4 -6,4', fill: 'none', stroke: '#afe327', 'stroke-opacity': .95, 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, 'pv-wind')
 				arw.style.setProperty('--pv-dist', dist.toFixed(0) + 'px')
 				arw.style.setProperty('--pv-wd', enc.dur + 's')
 				arw.style.animationDelay = (i * 0.5) + 's'

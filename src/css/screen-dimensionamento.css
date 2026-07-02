@@ -71,6 +71,9 @@
 .dim-grid .eco-pool-parameters { gap: 12px 14px; }
 .dim-grid .eco-area-fields { gap: 10px; }
 .dim-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* botões verde-escuro: texto lime no hover (Ver Resultados, Baixar Resultados) */
+.eco-btn-primary:hover:not(:disabled) { color: var(--green-triplob, #afe327); }
 .dim-col {
     display: flex;
     flex-direction: column;
