@@ -1,0 +1,63 @@
+/* Estilos e animações da visualização 3D da piscina (componente PoolViz).
+   Somente SVG/CSS — sem dependências. Classes prefixadas com "pv-". */
+
+.pv-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.pv-sheen { animation: pvSheen 4.6s ease-in-out infinite; }
+@keyframes pvSheen {
+    0% { transform: translateX(-46%); }
+    50% { transform: translateX(46%); }
+    100% { transform: translateX(-46%); }
+}
+
+.pv-ripple { animation: pvRipple 3.6s ease-in-out infinite; }
+.pv-ripple.b { animation-delay: 1.1s; }
+.pv-ripple.c { animation-delay: 2.2s; }
+@keyframes pvRipple {
+    0%, 100% { opacity: 0; }
+    45% { opacity: .45; }
+}
+
+.pv-jet {
+    animation: pvJet 2.2s ease-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+@keyframes pvJet {
+    0% { opacity: 0; transform: scale(.3); }
+    30% { opacity: .9; }
+    100% { opacity: 0; transform: scale(1.9); }
+}
+
+.pv-fall { animation: pvFall 1s linear infinite; }
+@keyframes pvFall {
+    from { transform: translateY(-14px); }
+    to { transform: translateY(0); }
+}
+
+.pv-wind {
+    animation: pvWind var(--pv-wd, 2.4s) linear infinite;
+    opacity: 0;
+}
+@keyframes pvWind {
+    0% { opacity: 0; transform: translateX(0); }
+    14% { opacity: .9; }
+    86% { opacity: .9; }
+    100% { opacity: 0; transform: translateX(var(--pv-dist, 120px)); }
+}
+
+.pv-caustic { animation: pvCaustic 6s ease-in-out infinite; }
+@keyframes pvCaustic {
+    0%, 100% { opacity: .12; }
+    50% { opacity: .28; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pv-sheen, .pv-ripple, .pv-jet, .pv-fall, .pv-wind, .pv-caustic {
+        animation: none;
+    }
+}
