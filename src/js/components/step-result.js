@@ -205,7 +205,7 @@ export class StepResult {
 					<p class="dim-subtitle">Com base nos dados informados, estas são as melhores opções para atender às suas necessidades.</p>
 				</div>
 
-				<div class="eco-pool-info dim-btu-note" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
+				<div class="eco-pool-info dim-btu-note" style="border-left-color: var(--green-triplob); background: #ffffff;">
 					<i data-lucide="info"></i>
 					<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>${HEATING_TIME_BASE_HOURS} horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
 				</div>
