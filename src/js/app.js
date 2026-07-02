@@ -26,7 +26,11 @@ export class App {
 			<div class="eco-logo">
 				<p>Encontre a bomba de calor ideal para sua piscina.</p>
 				<img src="${logoEcopool}" alt="Ecopool Logo">
-			</div>
+			</div>`
+	}
+
+	renderStepper() {
+		return `
 			<div class="eco-stepper" role="list">
 				<span class="eco-step is-on" data-step="1" role="listitem"><span class="n">1</span> Dimensionamento</span>
 				<span class="eco-step-sep"></span>
@@ -38,8 +42,11 @@ export class App {
 		this.container.innerHTML = `
 			<div class="eco-simulator">
 				${this.renderHeader()}
-				<div id="screen1-mount"></div>
-				<div id="screen2-mount" hidden></div>
+				<div class="eco-page">
+					${this.renderStepper()}
+					<div id="screen1-mount"></div>
+					<div id="screen2-mount" hidden></div>
+				</div>
 			</div>`
 		this.currentScreen = 1
 		this._mountScreen1()

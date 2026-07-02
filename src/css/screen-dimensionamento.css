@@ -2,12 +2,36 @@
    Apenas ARRANJO — os controles reutilizam as classes .eco-* existentes.
    Classes novas prefixadas com "dim-" para não colidir com o design system. */
 
+/* container centralizado do fluxo (mais largo que o .eco-container de card único) */
+.eco-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+}
+
+.dim-head { text-align: center; margin-bottom: 18px; }
+.dim-title {
+    font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+    color: var(--verde-escuro, #00353b);
+    margin-bottom: 4px;
+    font-weight: 700;
+}
+.dim-subtitle { color: var(--cinza-escuro, #666); font-size: 0.95rem; }
+
 .dim-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: 18px;
     align-items: start;
 }
+
+/* Dentro do dashboard os controles precisam encolher para caber na coluna
+   (os inputs/selects do design system não têm width definido). */
+.dim-grid .eco-form-group { min-width: 0; }
+.dim-grid .eco-input,
+.dim-grid .eco-select { width: 100%; min-width: 0; }
+.dim-grid .eco-area-fields { gap: 10px; }
 .dim-col {
     display: flex;
     flex-direction: column;

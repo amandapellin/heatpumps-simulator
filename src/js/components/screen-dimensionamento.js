@@ -234,10 +234,10 @@ export class ScreenDimensionamento {
 	// ---------------------------------------------------------------- render
 	render() {
 		return `
-			<div class="eco-container" style="max-width:1180px;">
-				<div class="eco-header" style="margin-bottom:16px;">
-					<h2 class="eco-card-title">Dados da piscina</h2>
-					<p class="eco-card-subtitle">Preencha os parâmetros — a visualização atualiza em tempo real.</p>
+			<div class="dim-wrap">
+				<div class="dim-head">
+					<h2 class="dim-title">Dados da piscina</h2>
+					<p class="dim-subtitle">Preencha os parâmetros — a visualização atualiza em tempo real.</p>
 				</div>
 				<div class="dim-grid">
 					<div class="dim-col">
@@ -350,6 +350,8 @@ export class ScreenDimensionamento {
 		}))
 
 		document.querySelector('#btnCalcular')?.addEventListener('click', () => this._proceed(onNext))
+
+		this.loadStates()
 	}
 
 	_proceed(onNext) {
