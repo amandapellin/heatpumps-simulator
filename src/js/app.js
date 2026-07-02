@@ -46,6 +46,17 @@ export class App {
 					<div id="screen1-mount"></div>
 					<div id="screen2-mount" hidden></div>
 				</div>
+				<footer id="page-footer" class="dim-page-footer" hidden>
+					<div class="dim-page-footer-inner">
+						<div>
+							<h3 class="dim-footer-title">Interessado em adquirir uma bomba de calor?</h3>
+							<p>Entre em contato com a revenda mais próxima e receba um orçamento personalizado.</p>
+						</div>
+						<button class="eco-btn eco-btn-tertiary" id="btnContactRevenda">
+							<i data-lucide="message-circle-more"></i> Contatar Revenda
+						</button>
+					</div>
+				</footer>
 			</div>`
 		this.currentScreen = 1
 		this._mountScreen1()
@@ -93,6 +104,7 @@ export class App {
 		this.currentScreen = n
 		document.querySelector('#screen1-mount').hidden = n !== 1
 		document.querySelector('#screen2-mount').hidden = n !== 2
+		document.querySelector('#page-footer').hidden = n !== 2
 		document.querySelectorAll('.eco-step').forEach(el =>
 			el.classList.toggle('is-on', Number(el.dataset.step) === n))
 		window.scrollTo({ top: 0, behavior: 'smooth' })

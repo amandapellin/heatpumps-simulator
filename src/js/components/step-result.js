@@ -14,7 +14,7 @@ export class StepResult {
     	this.poolData = poolData
 		this.apiService = apiService
     	this.results = null
-    	this.isChartVisible = false
+    	this.isChartVisible = true
 		this.isLoading = true
 		this.error = null
   	}
@@ -199,100 +199,62 @@ export class StepResult {
 
 	render() {
 		return `
-			<div class="eco-container dim-results">
+			<div class="dim-wrap dim-results">
 				<div class="dim-head">
 					<h2 class="dim-title">Resultados</h2>
 					<p class="dim-subtitle">Com base nos dados informados, estas são as melhores opções para atender às suas necessidades.</p>
 				</div>
-				<div class="eco-card dim-results-card">
-					<div class="eco-results-body">
-						<div class="eco-results-list">
-							<div class="eco-pool-info" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
-								<i data-lucide="info"></i>
-								<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>${HEATING_TIME_BASE_HOURS} horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
+
+				<div class="eco-pool-info dim-btu-note" style="border-left-color: var(--green-triplob); background: rgba(175, 227, 39, 0.1);">
+					<i data-lucide="info"></i>
+					<p class="eco-result-text"> A capacidade de aquecimento necessária para elevar a temperatura da água de <strong>${this.poolData.temperaturaInicial || 20}°C</strong> para <strong>${this.poolData.temperaturaDesejada || 32}°C</strong> em <strong>${HEATING_TIME_BASE_HOURS} horas</strong> é de: <strong>${this.results?.heatLoss?.requiredPumpEnergy ? Math.round(this.results.heatLoss.requiredPumpEnergy / KJ_TO_BTU).toLocaleString('pt-BR') + ' BTU/h' : '--'}</strong></p>
+				</div>
+
+				<div class="dim-grid dim-results-grid">
+					<div class="dim-col">
+						${this.renderCards()}
+					</div>
+					<div class="dim-col">
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">📉</span><h3>Comparativo de custos</h3></div>
+							<div class="dim-card-b">
+								<div style="position: relative; height: 300px; width: 100%;"><canvas id="costComparisonChart"></canvas></div>
+								<div class="eco-results-chart-info">${this.renderSavings()}</div>
 							</div>
-							${this.renderCards()}
 						</div>
-						<div class="eco-results-chart">
-							<div class="eco-results-chart-header">
-								<div class="eco-results-header-icon">
-									<i data-lucide="trending-down"></i>
-								</div>
-								<div>
-									<h3 class="eco-results-chart-title">Comparativo de Custos</h3>
-									<p class="eco-result-text">Análise comparativa entre diferentes métodos de aquecimento de piscinas.</p>
-								</div>
-							</div>
-							<div class="eco-results-chart-wrapper">
-								<div style="position: relative; height: 300px; width: 100%;">
-									<canvas id="costComparisonChart"></canvas>
-								</div>
-							</div>
-							<div class="eco-results-chart-wrapper" id="monthlyChartSection" style="display: none;">
-								<h4 style="font-size: 1.125rem; font-weight: 600; color: var(--verde-escuro); margin-bottom: 1rem;">
-									Custos Mensais por Sistema
-								</h4>
-								<div style="position: relative; height: 350px; width: 100%;">
-									<canvas id="monthlyComparisonChart"></canvas>
-								</div>
-							</div>
-							<div class="eco-results-chart-info">
-								${this.renderSavings()}
-							</div>
-							<div class="eco-step-actions eco-step-actions-result">
-								<button class="eco-btn eco-btn-tertiary eco-btn-small" id="btnMonthlyComparison">
-									<i data-lucide="file-spreadsheet"></i> 
-									Comparativo Mensal
-								</button>
-								<button class="eco-btn eco-btn-primary eco-btn-small" id="btnDownload">
-									<i data-lucide="download-cloud"></i>
-									Baixar Resultados
-								</button>
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">📅</span><h3>Custos mensais por sistema</h3></div>
+							<div class="dim-card-b" id="monthlyChartSection">
+								<div style="position: relative; height: 340px; width: 100%;"><canvas id="monthlyComparisonChart"></canvas></div>
 							</div>
 						</div>
 					</div>
-					<div class="eco-step-actions eco-step-actions-back">
-						<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">Voltar</button>
-					</div>
-					<div class="eco-results-footer">
-						<h3 class="eco-footer-title">Interessado em adquirir uma bomba de calor?</h3>
-                        <p class="eco-card-subtitle">Entre em contato com a revenda mais próxima e receba um orçamento personalizado.</p>
-						<button class="eco-btn eco-btn-tertiary" id="btnContactRevenda">
-							<i data-lucide="message-circle-more"></i>
-							Contatar Revenda
-						</button>
-					</div>
+				</div>
+
+				<div class="dim-results-actions">
+					<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">← Voltar</button>
+					<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnDownload">
+						<i data-lucide="download-cloud"></i> Baixar Resultados
+					</button>
 				</div>
 			</div>
 		`
 	}
 
 	bindEvents(onReset, onBack) {
-		const btnBack = document.querySelector('#btnBackPool')
+		document.querySelector('#btnBackPool')?.addEventListener('click', () => onBack())
+
 		const btnDownload = document.querySelector('#btnDownload')
-		const btnMonthlyComparison = document.querySelector('#btnMonthlyComparison')
-
-		btnBack?.addEventListener('click', () => {
-			onBack()
-		})
-
 		btnDownload?.addEventListener('click', async () => {
 			await this.handleDownloadPdf(btnDownload)
 		})
 
-		btnMonthlyComparison?.addEventListener('click', () => {
-			this.isChartVisible = !this.isChartVisible
-			const chartSection = document.querySelector('#monthlyChartSection')
-			if (chartSection) {
-				chartSection.style.display = this.isChartVisible ? 'block' : 'none'
-			}
-			if (this.isChartVisible && !this.monthlyChart) {
-				this.renderMonthlyChart()
-			}
+		// Ambos os gráficos são renderizados de imediato — o comparativo mensal
+		// fica sempre visível ao lado das bombas (sem botão de alternância).
+		requestAnimationFrame(() => {
+			this.renderChart()
+			this.renderMonthlyChart()
 		})
-
-		// Aguarda o próximo frame para garantir que o canvas tenha dimensões computadas.
-		requestAnimationFrame(() => this.renderChart())
 	}
 
 	renderChart(overrideOptions = {}) {

@@ -50,7 +50,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     gap: 18px;
-    align-items: start;
+    /* colunas esticam à mesma altura para o sticky da viz ter curso */
+    align-items: stretch;
 }
 
 /* Dentro do dashboard os controles encolhem para caber na coluna e ficam mais
@@ -76,8 +77,8 @@
     gap: 16px;
     min-width: 0;
 }
-/* a viz acompanha o scroll do formulário (sem fixar) */
-.dim-viz-card { overflow: hidden; }
+/* a viz acompanha o scroll do formulário (sticky com curso na coluna esticada) */
+.dim-viz-card { overflow: hidden; position: sticky; top: 16px; align-self: start; }
 
 /* cards no estilo do protótipo (contêiner enxuto com cabeçalho ícone+título) */
 .dim-card {
@@ -260,14 +261,36 @@
 }
 .eco-step-sep { width: 20px; height: 1px; background: rgba(255, 255, 255, 0.3); }
 
-/* Tela 2 (Resultados) — coerência visual com o formulário */
-.eco-container.dim-results { max-width: 1080px; }
+/* Tela 2 (Resultados) — mesmo layout de dashboard da Tela 1 */
 .dim-results .dim-head { margin-bottom: 14px; }
-.dim-results-card {
-    border: 1px solid var(--cinza-claro, #e0e0e0);
-    border-radius: 14px;
-    box-shadow: 0 1px 2px rgba(20, 20, 43, 0.05), 0 16px 34px -24px rgba(0, 53, 59, 0.33);
+.dim-btu-note { margin-bottom: 16px; }
+.dim-results-grid { align-items: start; }
+.dim-results-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
 }
+
+/* rodapé de página (largura total) */
+.dim-page-footer {
+    background: rgba(0, 53, 59, 0.9);
+    color: var(--bege, #faf3e9);
+    margin-top: 40px;
+    padding: 26px 20px;
+}
+.dim-page-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+.dim-footer-title { margin: 0 0 4px; color: #fff; font-size: 1.05rem; }
+.dim-page-footer p { margin: 0; color: var(--bege, #faf3e9); font-size: 0.9rem; }
 
 @media (max-width: 900px) {
     .dim-grid { grid-template-columns: 1fr; }
