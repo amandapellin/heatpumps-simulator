@@ -2,6 +2,33 @@
    Apenas ARRANJO — os controles reutilizam as classes .eco-* existentes.
    Classes novas prefixadas com "dim-" para não colidir com o design system. */
 
+/* fundo da página igual ao protótipo */
+.eco-simulator {
+    background:
+        radial-gradient(1100px 560px at 80% -12%, #f4faf9, transparent),
+        var(--ground, #eaf1f0);
+}
+
+/* cabeçalho slim: marca à esquerda, stepper à direita */
+.dim-topbar {
+    background: rgba(0, 53, 59, 0.9);
+    padding: 0.75rem 0;
+    margin-bottom: 1.75rem;
+}
+.dim-topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+.dim-brand { display: flex; align-items: center; gap: 14px; }
+.dim-brand img { height: 38px; display: block; }
+.dim-brand p { margin: 0; color: var(--bege, #faf3e9); font-size: 0.9rem; }
+
 /* container centralizado do fluxo (mais largo que o .eco-container de card único) */
 .eco-page {
     width: 100%;
@@ -10,7 +37,7 @@
     padding: 0 20px 40px;
 }
 
-.dim-head { text-align: center; margin-bottom: 18px; }
+.dim-head { text-align: left; margin-bottom: 18px; }
 .dim-title {
     font-size: clamp(1.3rem, 2.4vw, 1.6rem);
     color: var(--verde-escuro, #00353b);
@@ -45,10 +72,20 @@
     overflow: hidden;
 }
 
+/* cards no estilo do protótipo (contêiner enxuto com cabeçalho ícone+título) */
+.dim-card {
+    background: #fff;
+    border: 1px solid var(--cinza-claro, #e0e0e0);
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(20, 20, 43, 0.05), 0 16px 34px -24px rgba(0, 53, 59, 0.33);
+    overflow: hidden;
+}
+.dim-card-b { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
 .dim-card-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 9px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--line-soft, #eef3f2);
 }
@@ -59,6 +96,31 @@
     margin: 0;
     color: var(--verde-medio, #004d56);
 }
+.dim-card-head .dim-ic {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(175, 227, 39, 0.16);
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    flex: 0 0 auto;
+}
+/* empurra o "ao vivo" e o botão "+ Área" para a direita do cabeçalho */
+.dim-card-head .dim-live,
+.dim-card-head .dim-add { margin-left: auto; }
+.dim-add {
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--verde-escuro, #00353b);
+    background: rgba(175, 227, 39, 0.16);
+    border: 1px solid #dceccf;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.dim-add:hover { background: rgba(175, 227, 39, 0.28); }
 .dim-live {
     display: inline-flex;
     align-items: center;
@@ -153,8 +215,8 @@
     gap: 10px;
     font-size: 13px;
     font-weight: 600;
-    color: var(--cinza-escuro, #666);
-    margin: 4px 0 18px;
+    color: var(--bege, #faf3e9);
+    margin: 0;
     flex-wrap: wrap;
 }
 .eco-step {
@@ -165,6 +227,7 @@
     border-radius: 999px;
     border: 1px solid var(--cinza-claro, #e0e0e0);
     background: #fff;
+    color: var(--verde-medio, #004d56);
 }
 .eco-step.is-on {
     color: var(--verde-escuro, #00353b);

@@ -241,60 +241,72 @@ export class ScreenDimensionamento {
 				</div>
 				<div class="dim-grid">
 					<div class="dim-col">
-						<div class="eco-card"><div class="eco-card-inner" style="padding:16px;">
-							<label class="eco-label" for="state">Estado</label>
-							<select class="eco-select" id="state" style="margin-bottom:12px;"><option value="">Selecione o estado</option></select>
-							<label class="eco-label" for="city">Cidade</label>
-							<select class="eco-select" id="city" disabled><option value="">Selecione a cidade</option></select>
-							<div class="dim-chips" id="climateChips"></div>
-						</div></div>
-
-						<div class="eco-card"><div style="padding:16px;">
-							<div class="eco-pool-parameters">
-								<div class="eco-form-group"><label class="eco-label" for="temperaturaDesejada">Temp. desejada (°C)</label>
-									<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5"></div>
-								<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. inicial (°C)</label>
-									<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="0" step="0.5"></div>
-								<div class="eco-form-group"><label class="eco-label" for="tipoUtilizacao">Tipo de utilização</label>
-									<select id="tipoUtilizacao" class="eco-select"><option value="privada">Privada</option><option value="coletiva">Coletiva</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="utilizacaoAnual">Utilização anual</label>
-									<select id="utilizacaoAnual" class="eco-select"><option value="ano_inteiro">Ano inteiro</option><option value="verao">Verão</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="utilizacaoMensal">Utilização mensal</label>
-									<select id="utilizacaoMensal" class="eco-select"><option value="finais_de_semana" selected>Finais de semana</option><option value="todos_os_dias">Todos os dias</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="localizacaoPiscina">Localização</label>
-									<select id="localizacaoPiscina" class="eco-select"><option value="externa" selected>Externa</option><option value="interna">Interna</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="utilizacaoCapaTermica">Capa térmica</label>
-									<select id="utilizacaoCapaTermica" class="eco-select"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="tanqueCompensacao">Tanque de compensação</label>
-									<select id="tanqueCompensacao" class="eco-select"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="velocidadeVento">Velocidade do vento</label>
-									<select id="velocidadeVento" class="eco-select"><option value="sem_vento">Sem vento</option><option value="fraco">Fraco (2.0 m/s)</option><option value="medio">Médio (4.0 m/s)</option><option value="forte">Forte (6.0 m/s)</option></select></div>
-								<div class="eco-form-group"><label class="eco-label" for="reabastecimentoDiario">Reabastecimento (%)</label>
-									<input type="number" id="reabastecimentoDiario" class="eco-input" value="0" min="0" max="100" step="1"></div>
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">📍</span><h3>Localização</h3></div>
+							<div class="dim-card-b">
+								<div class="eco-form-group"><label class="eco-label" for="state">Estado</label>
+									<select class="eco-select" id="state"><option value="">Selecione o estado</option></select></div>
+								<div class="eco-form-group"><label class="eco-label" for="city">Cidade</label>
+									<select class="eco-select" id="city" disabled><option value="">Selecione a cidade</option></select></div>
+								<div class="dim-chips" id="climateChips"></div>
 							</div>
-						</div></div>
+						</div>
 
-						<div class="eco-card"><div style="padding:16px;">
-							<div class="eco-pool-parameters">
-								<div class="eco-form-group"><label class="eco-label" for="comprimentoBordaInfinita">Borda infinita (cm)</label>
-									<input type="number" id="comprimentoBordaInfinita" class="eco-input" value="0" min="0" step="0.1"></div>
-								<div class="eco-form-group"><label class="eco-label" for="larguraCascata">Cascata (cm)</label>
-									<input type="number" id="larguraCascata" class="eco-input" value="0" min="0" step="0.1"></div>
-								<div class="eco-form-group eco-full"><label class="eco-label" for="dispositivoHidromassagem">Dispositivos de hidromassagem (un)</label>
-									<input type="number" id="dispositivoHidromassagem" class="eco-input" value="0" min="0" step="1"></div>
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">🏊</span><h3>Áreas da piscina</h3>
+								<button type="button" class="dim-add" id="btnAddArea">+ Área</button></div>
+							<div class="dim-card-b">
+								<div class="eco-pool-info"><i data-lucide="info"></i>
+									<p class="eco-pool-info-text">Áreas com menos de 0,6 m de profundidade são consideradas prainhas.</p></div>
+								<div id="poolAreasContainer"></div>
 							</div>
-						</div></div>
+						</div>
+
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">🌡️</span><h3>Temperatura &amp; uso</h3></div>
+							<div class="dim-card-b">
+								<div class="eco-pool-parameters">
+									<div class="eco-form-group"><label class="eco-label" for="temperaturaDesejada">Temp. desejada (°C)</label>
+										<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5"></div>
+									<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. inicial (°C)</label>
+										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="0" step="0.5"></div>
+									<div class="eco-form-group"><label class="eco-label" for="tipoUtilizacao">Tipo de utilização</label>
+										<select id="tipoUtilizacao" class="eco-select"><option value="privada">Privada</option><option value="coletiva">Coletiva</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="utilizacaoAnual">Utilização anual</label>
+										<select id="utilizacaoAnual" class="eco-select"><option value="ano_inteiro">Ano inteiro</option><option value="verao">Verão</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="utilizacaoMensal">Utilização mensal</label>
+										<select id="utilizacaoMensal" class="eco-select"><option value="finais_de_semana" selected>Finais de semana</option><option value="todos_os_dias">Todos os dias</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="localizacaoPiscina">Localização</label>
+										<select id="localizacaoPiscina" class="eco-select"><option value="externa" selected>Externa</option><option value="interna">Interna</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="utilizacaoCapaTermica">Capa térmica</label>
+										<select id="utilizacaoCapaTermica" class="eco-select"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="tanqueCompensacao">Tanque de compensação</label>
+										<select id="tanqueCompensacao" class="eco-select"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="velocidadeVento">Velocidade do vento</label>
+										<select id="velocidadeVento" class="eco-select"><option value="sem_vento">Sem vento</option><option value="fraco">Fraco (2.0 m/s)</option><option value="medio">Médio (4.0 m/s)</option><option value="forte">Forte (6.0 m/s)</option></select></div>
+									<div class="eco-form-group"><label class="eco-label" for="reabastecimentoDiario">Reabastecimento (%)</label>
+										<input type="number" id="reabastecimentoDiario" class="eco-input" value="0" min="0" max="100" step="1"></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="dim-card">
+							<div class="dim-card-head"><span class="dim-ic">💦</span><h3>Bordas &amp; dispositivos</h3></div>
+							<div class="dim-card-b">
+								<div class="eco-pool-parameters">
+									<div class="eco-form-group"><label class="eco-label" for="comprimentoBordaInfinita">Borda infinita (cm)</label>
+										<input type="number" id="comprimentoBordaInfinita" class="eco-input" value="0" min="0" step="0.1"></div>
+									<div class="eco-form-group"><label class="eco-label" for="larguraCascata">Cascata (cm)</label>
+										<input type="number" id="larguraCascata" class="eco-input" value="0" min="0" step="0.1"></div>
+									<div class="eco-form-group eco-full"><label class="eco-label" for="dispositivoHidromassagem">Dispositivos de hidromassagem (un)</label>
+										<input type="number" id="dispositivoHidromassagem" class="eco-input" value="0" min="0" step="1"></div>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div class="dim-col">
-						<div class="eco-card"><div style="padding:16px;">
-							<div class="eco-pool-info"><i data-lucide="info"></i>
-								<p class="eco-pool-info-text">Áreas com menos de 0,6 m de profundidade são consideradas prainhas.</p></div>
-							<button type="button" class="eco-btn eco-btn-secondary eco-btn-small" id="btnAddArea" style="margin:10px 0;">+ Adicionar Área</button>
-							<div id="poolAreasContainer"></div>
-						</div></div>
-
-						<div class="eco-card dim-viz-card">
+						<div class="dim-card dim-viz-card">
 							<div class="dim-card-head">
 								<h3>Visualização 3D</h3>
 								<span class="dim-live"><span class="dot"></span> tempo real</span>
