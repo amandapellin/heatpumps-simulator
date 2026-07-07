@@ -97,6 +97,18 @@
 .dim-grid .eco-area-fields { gap: 10px; }
 .dim-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+/* validação inline de campo (ex.: temperatura fora da faixa) */
+.dim-field-error {
+    margin: 4px 0 0;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: #c0392b;
+}
+.dim-grid .eco-input.is-invalid {
+    border-color: #e07a72;
+    box-shadow: 0 0 0 3px rgba(224, 122, 114, 0.15);
+}
+
 /* botões verde-escuro: texto lime no hover (Ver Resultados, Baixar Resultados) */
 .eco-btn-primary:hover:not(:disabled) { color: var(--green-triplob, #afe327); }
 .dim-col {

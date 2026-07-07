@@ -137,6 +137,19 @@ export class ScreenDimensionamento {
 		return !isNaN(d) && d > 0 && d <= PRAINHA_DEPTH
 	}
 
+	// Valida a temperatura média inicial (10–30 °C): mostra a mensagem inline e
+	// marca o campo. Retorna true quando dentro da faixa. Espelha o limite do
+	// backend (Constants::TEMP_INICIAL_MIN/MAX + ValidationMiddleware).
+	_validateTempInicial() {
+		const input = document.querySelector('#temperaturaInicial')
+		const err = document.querySelector('#tempInicialError')
+		const v = parseFloat(this.data.temperaturaInicial)
+		const invalid = isNaN(v) || v < 10 || v > 30
+		if (input) input.classList.toggle('is-invalid', invalid)
+		if (err) err.hidden = !invalid
+		return !invalid
+	}
+
 	renderAreas() {
 		const container = document.querySelector('#poolAreasContainer')
 		if (!container) return
@@ -316,7 +329,8 @@ export class ScreenDimensionamento {
 									<div class="eco-form-group"><label class="eco-label" for="temperaturaDesejada">Temp. desejada (°C)</label>
 										<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5"></div>
 									<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. média inicial (°C)</label>
-										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="10" max="30" step="0.5"></div>
+										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="10" max="30" step="0.5" aria-describedby="tempInicialError">
+										<p class="dim-field-error" id="tempInicialError" hidden>A temperatura média inicial deve estar entre 10 e 30 °C.</p></div>
 									<div class="eco-form-group"><label class="eco-label" for="tipoUtilizacao">Tipo de utilização</label>
 										<select id="tipoUtilizacao" class="eco-select"><option value="privada">Privada</option><option value="coletiva">Coletiva</option></select></div>
 									<div class="eco-form-group"><label class="eco-label" for="utilizacaoAnual">Utilização anual</label>
@@ -406,6 +420,7 @@ export class ScreenDimensionamento {
 		fields.forEach(f => document.querySelector('#' + f)?.addEventListener('input', (e) => {
 			this.data[f] = e.target.value
 			this.refreshViz()
+			if (f === 'temperaturaInicial') this._validateTempInicial()
 		}))
 
 		document.querySelector('#btnCalcular')?.addEventListener('click', () => this._proceed(onNext))
@@ -420,6 +435,10 @@ export class ScreenDimensionamento {
 		if (this.areas.length === 0) { showToast('Adicione pelo menos uma área de piscina.', 'warning'); return }
 		if (this.areas.some(a => !a.comprimento || !a.largura || !a.profundidade)) {
 			showToast('Preencha todos os campos das áreas adicionadas.', 'warning'); return
+		}
+		if (!this._validateTempInicial()) {
+			document.querySelector('#temperaturaInicial')?.focus()
+			return
 		}
 		if (parseFloat(this.data.temperaturaDesejada) <= parseFloat(this.data.temperaturaInicial)) {
 			showToast('A temperatura desejada deve ser maior que a temperatura inicial.', 'warning'); return
