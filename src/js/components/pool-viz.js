@@ -124,23 +124,36 @@ export class PoolViz {
 		scene.textContent = ''
 		const ox0 = this.VBW, oy0 = this.VBH
 
-		// Setores encostados ao longo do comprimento (x); borda de trás alinhada
-		// em y=0; superfície da água em z=0. Profundidades (H) distintas por área.
+		// Cada setor se encosta ao ANTERIOR pela lateral cuja dimensão coincide:
+		//  - mesma largura  -> encaixa ao longo do COMPRIMENTO (eixo x);
+		//  - mesmo comprimento -> encaixa ao longo da LARGURA (eixo y), formando um L;
+		//  - nenhuma dimensão igual -> qualquer lado (segue no comprimento).
+		// Superfície da água em z=0; profundidades (H) distintas por área.
+		const EPS = 1e-3
 		const boxes = []
-		let x = 0
 		areas.forEach((a, i) => {
-			boxes.push({ i, X0: x, L: a.L, W: a.W, H: a.H, pra: a.H <= PRAINHA_DEPTH && a.H > 0 })
-			x += a.L
+			let X0 = 0, Y0 = 0
+			if (i > 0) {
+				const prev = boxes[i - 1]
+				if (Math.abs(a.W - prev.W) < EPS) {          // mesma largura -> ao longo do comprimento
+					X0 = prev.X0 + prev.L; Y0 = prev.Y0
+				} else if (Math.abs(a.L - prev.L) < EPS) {   // mesmo comprimento -> ao longo da largura
+					X0 = prev.X0; Y0 = prev.Y0 + prev.W
+				} else {                                     // sem dimensão igual -> segue no comprimento
+					X0 = prev.X0 + prev.L; Y0 = prev.Y0
+				}
+			}
+			boxes.push({ i, X0, Y0, L: a.L, W: a.W, H: a.H, pra: a.H <= PRAINHA_DEPTH && a.H > 0 })
 		})
-		const totalL = x || 0.1
-		const maxW = Math.max(...boxes.map(b => b.W))
+		const totalL = Math.max(...boxes.map(b => b.X0 + b.L)) || 0.1
+		const maxW = Math.max(...boxes.map(b => b.Y0 + b.W)) || 0.1
 		const prim = boxes[0]
 		const last = boxes[boxes.length - 1]
 		const multi = boxes.length > 1
 
 		const cornersOf = (b) => [
-			[b.X0, 0, 0], [b.X0 + b.L, 0, 0], [b.X0 + b.L, b.W, 0], [b.X0, b.W, 0],
-			[b.X0, 0, b.H], [b.X0 + b.L, 0, b.H], [b.X0 + b.L, b.W, b.H], [b.X0, b.W, b.H],
+			[b.X0, b.Y0, 0], [b.X0 + b.L, b.Y0, 0], [b.X0 + b.L, b.Y0 + b.W, 0], [b.X0, b.Y0 + b.W, 0],
+			[b.X0, b.Y0, b.H], [b.X0 + b.L, b.Y0, b.H], [b.X0 + b.L, b.Y0 + b.W, b.H], [b.X0, b.Y0 + b.W, b.H],
 		]
 		const footC = [[0, 0, 0], [totalL, 0, 0], [totalL, maxW, 0], [0, maxW, 0]]
 
@@ -168,7 +181,8 @@ export class PoolViz {
 
 		// PASSA 1 — corpo sólido de cada setor (fundo a frente): interior, água,
 		// paredes externas e wireframe. A ordem por X0 garante a oclusão correta.
-		const drawOrder = boxes.slice().sort((a, b) => a.X0 - b.X0)
+		// pintor: setores ao fundo (menor x+y) primeiro; à frente por cima
+		const drawOrder = boxes.slice().sort((a, b) => (a.X0 + a.Y0) - (b.X0 + b.Y0))
 		drawOrder.forEach(b => {
 			const P = b.P
 			scene.appendChild(el('polygon', { points: ptsOf(P, [4, 5, 6, 7]), fill: 'url(#pvFloor)' }))
@@ -302,7 +316,7 @@ export class PoolViz {
 		if (multi) {
 			boxes.forEach(b => {
 				if (b.i === 0) return
-				const c = pt(b.X0 + b.L / 2, b.W * 0.6, 0)
+				const c = pt(b.X0 + b.L / 2, b.Y0 + b.W * 0.6, 0)
 				this._chip(c.x, c.y, 'Área ' + (b.i + 1), b.pra ? '#1c7a72' : '#00353b', '#fff')
 			})
 		}
