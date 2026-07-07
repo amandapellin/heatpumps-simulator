@@ -131,6 +131,8 @@
 .dim-card-b { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 /* card de área mais compacto dentro do dashboard */
 .dim-grid .eco-area-card { padding: 12px; margin: 0; }
+/* respiro entre áreas consecutivas (evita cards grudados) */
+.dim-grid .eco-area-card + .eco-area-card { margin-top: 10px; }
 .dim-grid .eco-area-header { margin-bottom: 8px; }
 
 .dim-card-head {
