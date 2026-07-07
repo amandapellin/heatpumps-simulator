@@ -312,12 +312,15 @@ export class PoolViz {
 			}
 		}
 
-		// rótulos dos setores adicionais (Área 2, 3…) sobre a superfície
+		// rótulos + cotas dos setores adicionais (Área 2, 3…) sobre a superfície.
+		// As dimensões vão no próprio selo (C × L × P) — evita barras de cota
+		// sobrepostas nos layouts em L.
 		if (multi) {
 			boxes.forEach(b => {
 				if (b.i === 0) return
 				const c = pt(b.X0 + b.L / 2, b.Y0 + b.W * 0.6, 0)
-				this._chip(c.x, c.y, 'Área ' + (b.i + 1), b.pra ? '#1c7a72' : '#00353b', '#fff')
+				const dims = `${this._nf(b.L)} × ${this._nf(b.W)} × ${this._nf(b.H)} m`
+				this._areaTag(c.x, c.y, 'Área ' + (b.i + 1), dims, b.pra)
 			})
 		}
 
@@ -358,6 +361,20 @@ export class PoolViz {
 		const t = el('text', { x: w / 2, y: h / 2 + 4, 'text-anchor': 'middle', 'font-size': 12, 'font-weight': 700, fill: fg })
 		t.textContent = text
 		g.appendChild(t)
+		this.scene.appendChild(g)
+	}
+
+	// Selo de duas linhas para setores extras: título (Área N) + cotas C×L×P.
+	_areaTag(x, y, title, dims, pra) {
+		const fg = pra ? '#1c7a72' : '#00353b'
+		const w = Math.max(title.length, dims.length) * 6.3 + 18, h = 32
+		const g = el('g', { transform: `translate(${(x - w / 2).toFixed(1)} ${(y - h / 2).toFixed(1)})` })
+		g.appendChild(el('rect', { x: 0, y: 0, width: w, height: h, rx: 7, fill: '#fff', 'fill-opacity': .94, stroke: fg, 'stroke-opacity': .22 }))
+		const t1 = el('text', { x: w / 2, y: 14, 'text-anchor': 'middle', 'font-size': 11.5, 'font-weight': 700, fill: fg })
+		t1.textContent = title
+		const t2 = el('text', { x: w / 2, y: 26, 'text-anchor': 'middle', 'font-size': 10, 'font-weight': 600, fill: pra ? '#2a8f86' : '#33555a' })
+		t2.textContent = dims
+		g.appendChild(t1); g.appendChild(t2)
 		this.scene.appendChild(g)
 	}
 }
