@@ -270,7 +270,7 @@ export class ScreenDimensionamento {
 								<div class="eco-pool-parameters">
 									<div class="eco-form-group"><label class="eco-label" for="temperaturaDesejada">Temp. desejada (°C)</label>
 										<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5"></div>
-									<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. inicial (°C)</label>
+									<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. média inicial (°C)</label>
 										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="0" step="0.5"></div>
 									<div class="eco-form-group"><label class="eco-label" for="tipoUtilizacao">Tipo de utilização</label>
 										<select id="tipoUtilizacao" class="eco-select"><option value="privada">Privada</option><option value="coletiva">Coletiva</option></select></div>
@@ -318,7 +318,7 @@ export class ScreenDimensionamento {
 							<div class="dim-metrics">
 								<div class="dim-metric"><div class="v" id="dimVol">—</div><div class="k">Volume</div></div>
 								<div class="dim-metric"><div class="v" id="dimArea">—</div><div class="k">Área</div></div>
-								<div class="dim-metric"><div class="v" id="dimDelta">—</div><div class="k">Δ Temp.</div></div>
+								<div class="dim-metric"><div class="v" id="dimDelta">—</div><div class="k">Diferença Temp.</div></div>
 								<div class="dim-metric"><div class="v" id="dimTipo">—</div><div class="k">Classificação</div></div>
 							</div>
 							<div class="dim-viz-actions">
