@@ -63,7 +63,7 @@ export class PoolViz {
 			const c = parseFloat(a.comprimento) || 0
 			const l = parseFloat(a.largura) || 0
 			const p = parseFloat(a.profundidade) || 0
-			if (p >= PRAINHA_DEPTH) { volume += c * l * p; area += c * l }
+			if (p > PRAINHA_DEPTH) { volume += c * l * p; area += c * l }
 		})
 		return { volume, area, deltaT: Math.max(0, (parseFloat(tDes) || 0) - (parseFloat(tIni) || 0)) }
 	}
@@ -115,7 +115,7 @@ export class PoolViz {
 
 	_render(st) {
 		const { L, W, H, vento, hidro, cascata, borda, capa } = st
-		const pr = H < PRAINHA_DEPTH && H > 0
+		const pr = H <= PRAINHA_DEPTH && H > 0
 		const scene = this.scene
 		const ox0 = this.VBW, oy0 = this.VBH
 

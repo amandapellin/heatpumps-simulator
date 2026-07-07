@@ -374,7 +374,7 @@ body {
     gap: 1rem;
 }
 
-/* Selo dinâmico: indica que a área será tratada como prainha (< 0,60 m). */
+/* Selo dinâmico: indica que a área será tratada como prainha (<= 0,60 m). */
 .eco-area-prainha-badge {
     display: none;
     align-items: center;

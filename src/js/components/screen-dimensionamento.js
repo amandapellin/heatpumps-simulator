@@ -134,7 +134,7 @@ export class ScreenDimensionamento {
 
 	_isPrainhaDepth(p) {
 		const d = parseFloat(p)
-		return !isNaN(d) && d > 0 && d < PRAINHA_DEPTH
+		return !isNaN(d) && d > 0 && d <= PRAINHA_DEPTH
 	}
 
 	renderAreas() {
@@ -157,7 +157,7 @@ export class ScreenDimensionamento {
 				</div>
 				<div class="eco-area-prainha-badge${this._isPrainhaDepth(area.profundidade) ? ' is-visible' : ''}" data-prainha-badge="${area.id}">
 					<i data-lucide="waves"></i>
-					<span>Esta área será tratada como <strong>prainha</strong> (parte rasa, profundidade &lt; ${PRAINHA_DEPTH} m).</span>
+					<span>Esta área será tratada como <strong>prainha</strong> (parte rasa, profundidade &le; ${PRAINHA_DEPTH} m).</span>
 				</div>
 			</div>`).join('')
 
@@ -301,7 +301,7 @@ export class ScreenDimensionamento {
 								<button type="button" class="dim-add" id="btnAddArea">+ Área</button></div>
 							<div class="dim-card-b">
 								<div class="eco-pool-info"><i data-lucide="info"></i>
-									<p class="eco-pool-info-text">Áreas com menos de 0,6 m de profundidade são consideradas prainhas.</p></div>
+									<p class="eco-pool-info-text">Áreas com profundidade de 0,6 m ou menos são consideradas prainhas.</p></div>
 								<div id="poolAreasContainer"></div>
 							</div>
 						</div>
