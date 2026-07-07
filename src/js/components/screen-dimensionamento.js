@@ -195,8 +195,11 @@ export class ScreenDimensionamento {
 			setTimeout(() => createIcons({ icons }), 0)
 		} else {
 			if (!this.viz) this.viz = new PoolViz(mount)
+			// só setores completos entram no desenho (Área 1 já é válida aqui)
+			const drawable = this.areas.filter(a =>
+				parseFloat(a.comprimento) > 0 && parseFloat(a.largura) > 0 && parseFloat(a.profundidade) > 0)
 			this.viz.update({
-				areas: this.areas,
+				areas: drawable,
 				velocidadeVento: this.data.velocidadeVento,
 				dispositivoHidromassagem: this.data.dispositivoHidromassagem,
 				larguraCascata: this.data.larguraCascata,

@@ -8,8 +8,11 @@ import '../../css/pool-viz.css'
  *   viz.update({ areas, velocidadeVento, dispositivoHidromassagem,
  *                larguraCascata, comprimentoBordaInfinita, utilizacaoCapaTermica })
  *
- * A caixa isométrica representa a ÁREA PRINCIPAL (areas[0]); as demais entram
- * apenas nas métricas (ver PoolViz.metrics()). A viz reage a vento/ambiente,
+ * As áreas são desenhadas como um ÚNICO CORPO CONECTADO: cada área vira um
+ * setor encostado no anterior ao longo do comprimento (mesma superfície d'água,
+ * profundidades distintas). A ÁREA PRINCIPAL (areas[0]) concentra os detalhes —
+ * dispositivos (hidromassagem/cascata/borda), efeitos de água e cotas — enquanto
+ * o vento/ambiente envolve o conjunto todo. A viz reage a vento/ambiente,
  * hidromassagem, cascata, borda infinita e capa térmica.
  */
 
@@ -69,12 +72,14 @@ export class PoolViz {
 	}
 
 	update(state = {}) {
-		const areas = state.areas || []
-		const prim = areas[0] || {}
+		const src = (state.areas && state.areas.length) ? state.areas : [{}]
+		const areas = src.map(a => ({
+			L: parseFloat(a.comprimento) || 0.1,
+			W: parseFloat(a.largura) || 0.1,
+			H: parseFloat(a.profundidade) || 0.1,
+		}))
 		this._render({
-			L: parseFloat(prim.comprimento) || 0.1,
-			W: parseFloat(prim.largura) || 0.1,
-			H: parseFloat(prim.profundidade) || 0.1,
+			areas,
 			vento: state.velocidadeVento || 'sem_vento',
 			hidro: parseInt(state.dispositivoHidromassagem, 10) || 0,
 			cascata: parseFloat(state.larguraCascata) || 0,
@@ -114,40 +119,80 @@ export class PoolViz {
 	}
 
 	_render(st) {
-		const { L, W, H, vento, hidro, cascata, borda, capa } = st
-		const pr = H <= PRAINHA_DEPTH && H > 0
+		const { areas, vento, hidro, cascata, borda, capa } = st
 		const scene = this.scene
+		scene.textContent = ''
 		const ox0 = this.VBW, oy0 = this.VBH
 
-		const c3 = [[0, 0, 0], [L, 0, 0], [L, W, 0], [0, W, 0], [0, 0, H], [L, 0, H], [L, W, H], [0, W, H]]
-		const proj = (sc) => c3.map(p => iso(p[0], p[1], p[2], sc))
-		let r = proj(1), bb = bbox(r)
+		// Setores encostados ao longo do comprimento (x); borda de trás alinhada
+		// em y=0; superfície da água em z=0. Profundidades (H) distintas por área.
+		const boxes = []
+		let x = 0
+		areas.forEach((a, i) => {
+			boxes.push({ i, X0: x, L: a.L, W: a.W, H: a.H, pra: a.H <= PRAINHA_DEPTH && a.H > 0 })
+			x += a.L
+		})
+		const totalL = x || 0.1
+		const maxW = Math.max(...boxes.map(b => b.W))
+		const prim = boxes[0]
+		const last = boxes[boxes.length - 1]
+		const multi = boxes.length > 1
+
+		const cornersOf = (b) => [
+			[b.X0, 0, 0], [b.X0 + b.L, 0, 0], [b.X0 + b.L, b.W, 0], [b.X0, b.W, 0],
+			[b.X0, 0, b.H], [b.X0 + b.L, 0, b.H], [b.X0 + b.L, b.W, b.H], [b.X0, b.W, b.H],
+		]
+		const footC = [[0, 0, 0], [totalL, 0, 0], [totalL, maxW, 0], [0, maxW, 0]]
+
+		// escala a partir do bounding box de todos os setores + do footprint
+		const collect = (sc) => {
+			const acc = []
+			boxes.forEach(b => cornersOf(b).forEach(c => acc.push(iso(c[0], c[1], c[2], sc))))
+			footC.forEach(c => acc.push(iso(c[0], c[1], c[2], sc)))
+			return acc
+		}
+		let bb = bbox(collect(1))
 		const s = Math.min((ox0 - 210) / bb.w, (oy0 - 200) / bb.h)
-		r = proj(s); bb = bbox(r)
+		bb = bbox(collect(s))
 		const ox = ox0 / 2 - (bb.minX + bb.maxX) / 2
 		const oy = oy0 / 2 - (bb.minY + bb.maxY) / 2 + 34
-		const P = r.map(p => ({ x: p.px + ox, y: p.py + oy }))
-		const pts = (idx) => idx.map(i => P[i].x.toFixed(1) + ',' + P[i].y.toFixed(1)).join(' ')
-		const topMinY = Math.min(P[0].y, P[1].y, P[2].y, P[3].y)
-		scene.textContent = ''
+		const pt = (px, py, pz) => { const p = iso(px, py, pz, s); return { x: p.px + ox, y: p.py + oy } }
 
-		// sombra projetada
-		const cx = (P[4].x + P[5].x + P[6].x + P[7].x) / 4
-		const cy = (P[4].y + P[5].y + P[6].y + P[7].y) / 4
-		scene.appendChild(el('ellipse', { cx, cy: cy + 8, rx: bb.w / 2 * .92, ry: bb.w / 2 * .26, fill: '#00353b', opacity: .09 }))
+		boxes.forEach(b => { b.P = cornersOf(b).map(c => pt(c[0], c[1], c[2])) })
+		const F = footC.map(c => pt(c[0], c[1], c[2]))
+		const topMinY = Math.min(F[0].y, F[1].y, F[2].y, F[3].y)
+		const ptsOf = (P, idx) => idx.map(i => P[i].x.toFixed(1) + ',' + P[i].y.toFixed(1)).join(' ')
 
-		// interior visível (fundo + paredes internas + arestas), lido através da água
-		scene.appendChild(el('polygon', { points: pts([4, 5, 6, 7]), fill: 'url(#pvFloor)' }))
-		scene.appendChild(el('polygon', { points: pts([0, 1, 5, 4]), fill: 'url(#pvWallI)', 'fill-opacity': .96 }))
-		scene.appendChild(el('polygon', { points: pts([0, 3, 7, 4]), fill: 'url(#pvWallI)', 'fill-opacity': .9 }));
-		[[4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(([a, b]) =>
-			scene.appendChild(el('line', { x1: P[a].x, y1: P[a].y, x2: P[b].x, y2: P[b].y, stroke: '#7fd3d8', 'stroke-opacity': .28, 'stroke-width': 1 })))
+		// sombra projetada do conjunto
+		scene.appendChild(el('ellipse', { cx: ox0 / 2, cy: bb.maxY + oy - 4, rx: bb.w / 2 * .96, ry: bb.w / 2 * .1, fill: '#00353b', opacity: .09 }))
 
-		// água translúcida
-		scene.appendChild(el('polygon', { points: pts([0, 1, 2, 3]), fill: pr ? 'url(#pvPra)' : 'url(#pvWater)' }))
-		this.clipPoly.setAttribute('points', pts([0, 1, 2, 3]))
+		// PASSA 1 — corpo sólido de cada setor (fundo a frente): interior, água,
+		// paredes externas e wireframe. A ordem por X0 garante a oclusão correta.
+		const drawOrder = boxes.slice().sort((a, b) => a.X0 - b.X0)
+		drawOrder.forEach(b => {
+			const P = b.P
+			scene.appendChild(el('polygon', { points: ptsOf(P, [4, 5, 6, 7]), fill: 'url(#pvFloor)' }))
+			scene.appendChild(el('polygon', { points: ptsOf(P, [0, 1, 5, 4]), fill: 'url(#pvWallI)', 'fill-opacity': .96 }))
+			scene.appendChild(el('polygon', { points: ptsOf(P, [0, 3, 7, 4]), fill: 'url(#pvWallI)', 'fill-opacity': .9 }));
+			[[4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].forEach(([a, c]) =>
+				scene.appendChild(el('line', { x1: P[a].x, y1: P[a].y, x2: P[c].x, y2: P[c].y, stroke: '#7fd3d8', 'stroke-opacity': .28, 'stroke-width': 1 })))
 
-		// efeitos na lâmina (recortados)
+			scene.appendChild(el('polygon', { points: ptsOf(P, [0, 1, 2, 3]), fill: b.pra ? 'url(#pvPra)' : 'url(#pvWater)' }))
+
+			scene.appendChild(el('polygon', { points: ptsOf(P, [1, 2, 6, 5]), fill: 'url(#pvWallO)' }))
+			scene.appendChild(el('polygon', { points: ptsOf(P, [3, 2, 6, 7]), fill: 'url(#pvWallO2)' }));
+
+			[[0, 1], [1, 2], [2, 3], [3, 0], [1, 5], [2, 6], [3, 7], [5, 6], [6, 7]].forEach(([a, c]) =>
+				scene.appendChild(el('line', { x1: P[a].x, y1: P[a].y, x2: P[c].x, y2: P[c].y, stroke: '#8fe6ff', 'stroke-opacity': .6, 'stroke-width': 1.25 })))
+		})
+
+		// PASSA 2 — detalhes "herói" sobre a Área 1 (e conjunto), por cima do sólido.
+		const P0 = prim.P
+		const L = prim.L, W = prim.W, H = prim.H
+
+		// efeitos na lâmina da Área 1 (recortados na sua superfície)
+		this.clipPoly.setAttribute('points', ptsOf(P0, [0, 1, 2, 3]))
+		const pbb = bbox(P0.map(p => ({ px: p.x, py: p.y })))
 		const gw = el('g', { 'clip-path': 'url(#pvClip)' })
 		for (let k = 0; k < 3; k++) {
 			const q0 = iso(L * 0.1, W * (0.25 + 0.25 * k), 0, s)
@@ -155,7 +200,7 @@ export class PoolViz {
 			gw.appendChild(el('line', { x1: q0.px + ox, y1: q0.py + oy, x2: q1.px + ox, y2: q1.py + oy, stroke: '#dffcff', 'stroke-width': 2, 'stroke-opacity': .2, 'stroke-linecap': 'round' }, 'pv-caustic'))
 		}
 		if (capa !== 'sim') {
-			gw.appendChild(el('rect', { x: bb.minX + ox - 40, y: bb.minY + oy - 40, width: 86, height: bb.h + 80, fill: 'url(#pvSheen)', transform: 'translate(' + (bb.w / 2) + ' 0)' }, 'pv-sheen'));
+			gw.appendChild(el('rect', { x: pbb.minX - 40, y: pbb.minY - 40, width: 86, height: pbb.h + 80, fill: 'url(#pvSheen)', transform: 'translate(' + (pbb.w / 2) + ' 0)' }, 'pv-sheen'));
 			[[.4, .4, 'pv-ripple'], [.62, .56, 'pv-ripple b'], [.5, .3, 'pv-ripple c']].forEach(([fx, fy, cls]) => {
 				const q = iso(L * fx, W * fy, 0, s)
 				gw.appendChild(el('ellipse', { cx: q.px + ox, cy: q.py + oy, rx: 15, ry: 8, fill: 'none', stroke: '#fff', 'stroke-opacity': .75, 'stroke-width': 1.3 }, cls))
@@ -163,7 +208,7 @@ export class PoolViz {
 		}
 		scene.appendChild(gw)
 
-		// hidromassagem nas paredes internas visíveis (fundo), abaixo da linha d'água
+		// hidromassagem nas paredes internas da Área 1 (fundo), abaixo da lâmina
 		const N = Math.min(hidro, 10)
 		if (N > 0) {
 			const zd = Math.min(0.35, H * 0.5)
@@ -182,27 +227,22 @@ export class PoolViz {
 			})
 		}
 
-		// capa térmica sobre a água
+		// capa térmica sobre TODOS os setores
 		if (capa === 'sim') {
-			scene.appendChild(el('polygon', { points: pts([0, 1, 2, 3]), fill: '#7fae5a', 'fill-opacity': .6, stroke: '#5c8a2e', 'stroke-width': 1 }))
-			const m = iso(L * .5, W * .5, 0, s)
-			this._chip(m.px + ox, m.py + oy, 'CAPA TÉRMICA', '#3c5a12', '#eef7e0')
+			boxes.forEach(b => scene.appendChild(el('polygon', { points: ptsOf(b.P, [0, 1, 2, 3]), fill: '#7fae5a', 'fill-opacity': .6, stroke: '#5c8a2e', 'stroke-width': 1 })))
+			const m = pt(L * .5, W * .5, 0)
+			this._chip(m.x, m.y, 'CAPA TÉRMICA', '#3c5a12', '#eef7e0')
 		}
 
-		// paredes externas frontais (sombreadas) — ocluem o interior frontal
-		scene.appendChild(el('polygon', { points: pts([1, 2, 6, 5]), fill: 'url(#pvWallO)' }))
-		scene.appendChild(el('polygon', { points: pts([3, 2, 6, 7]), fill: 'url(#pvWallO2)' }))
-
-		// cascata na parede do COMPRIMENTO (esquerda, face 3-2-6-7) — desenhada
-		// sobre a parede para ficar visível.
+		// cascata na parede do COMPRIMENTO da Área 1 (face 3-2-6-7) — externa
 		if (cascata > 0) {
-			this.clipCascPoly.setAttribute('points', pts([3, 2, 6, 7]))
+			this.clipCascPoly.setAttribute('points', ptsOf(P0, [3, 2, 6, 7]))
 			const gc = el('g', { 'clip-path': 'url(#pvClipCasc)' })
 			const frac = Math.max(.2, Math.min(.85, cascata / 300))
-			const ax = P[3].x, ay = P[3].y, ex = P[2].x - P[3].x, ey = P[2].y - P[3].y
+			const ax = P0[3].x, ay = P0[3].y, ex = P0[2].x - P0[3].x, ey = P0[2].y - P0[3].y
 			const x1 = ax + ex * (.5 - frac / 2), y1 = ay + ey * (.5 - frac / 2)
 			const x2 = ax + ex * (.5 + frac / 2), y2 = ay + ey * (.5 + frac / 2)
-			const dx = P[7].x - P[3].x, dy = P[7].y - P[3].y
+			const dx = P0[7].x - P0[3].x, dy = P0[7].y - P0[3].y
 			gc.appendChild(el('polygon', { points: `${x1},${y1} ${x2},${y2} ${x2 + dx},${y2 + dy} ${x1 + dx},${y1 + dy}`, fill: 'url(#pvFall)' }))
 			const strp = el('g', {}, 'pv-fall')
 			for (let k = 0; k < 4; k++) {
@@ -213,25 +253,23 @@ export class PoolViz {
 			scene.appendChild(gc)
 		}
 
-		// borda infinita: transbordo na parede da LARGURA (direita, aresta 1-2)
+		// borda infinita: transbordo na parede da LARGURA do ÚLTIMO setor (extremo
+		// direito, aresta 1-2) — parede externa oposta à cascata.
 		if (borda > 0) {
-			scene.appendChild(el('line', { x1: P[1].x, y1: P[1].y, x2: P[2].x, y2: P[2].y, stroke: '#d9f7ff', 'stroke-width': 3, 'stroke-opacity': .95 }))
-			const dx = (P[5].x - P[1].x) * .55, dy = (P[5].y - P[1].y) * .55
-			scene.appendChild(el('polygon', { points: `${P[1].x},${P[1].y} ${P[2].x},${P[2].y} ${P[2].x + dx},${P[2].y + dy} ${P[1].x + dx},${P[1].y + dy}`, fill: 'url(#pvFall)', 'fill-opacity': .75 }, 'pv-fall'))
+			const LP = last.P
+			scene.appendChild(el('line', { x1: LP[1].x, y1: LP[1].y, x2: LP[2].x, y2: LP[2].y, stroke: '#d9f7ff', 'stroke-width': 3, 'stroke-opacity': .95 }))
+			const dx = (LP[5].x - LP[1].x) * .55, dy = (LP[5].y - LP[1].y) * .55
+			scene.appendChild(el('polygon', { points: `${LP[1].x},${LP[1].y} ${LP[2].x},${LP[2].y} ${LP[2].x + dx},${LP[2].y + dy} ${LP[1].x + dx},${LP[1].y + dy}`, fill: 'url(#pvFall)', 'fill-opacity': .75 }, 'pv-fall'))
 		}
 
-		// arestas externas (wireframe)
-		;[[0, 1], [1, 2], [2, 3], [3, 0], [1, 5], [2, 6], [3, 7], [5, 6], [6, 7]].forEach(([a, b]) =>
-			scene.appendChild(el('line', { x1: P[a].x, y1: P[a].y, x2: P[b].x, y2: P[b].y, stroke: '#8fe6ff', 'stroke-opacity': .6, 'stroke-width': 1.25 })))
-
-		// ambiente (muros conforme o vento) + tag
+		// ambiente (muros conforme o vento) envolvendo o conjunto (footprint) + tag
 		const rise = Math.min(78, bb.h * 0.5)
-		const up = (p) => ({ x: P[p].x, y: P[p].y - rise })
+		const up = (idx) => ({ x: F[idx].x, y: F[idx].y - rise })
 		const enc = WIND_ENCLOSURE[vento] || WIND_ENCLOSURE.medio
 		enc.walls.forEach(([a, b]) => {
 			const A = up(a), B = up(b), front = (a === 2 || b === 2)
 			scene.appendChild(el('polygon', {
-				points: `${P[a].x},${P[a].y} ${P[b].x},${P[b].y} ${B.x},${B.y} ${A.x},${A.y}`,
+				points: `${F[a].x},${F[a].y} ${F[b].x},${F[b].y} ${B.x},${B.y} ${A.x},${A.y}`,
 				fill: 'url(#pvGlass)', 'fill-opacity': front ? .28 : 1, stroke: '#bfe9ff', 'stroke-opacity': front ? .35 : .6, 'stroke-width': 1,
 			}))
 		})
@@ -241,14 +279,14 @@ export class PoolViz {
 		}
 		this._chip(this.VBW / 2, enc.walls.length ? topMinY - rise - 14 : topMinY - 20, enc.tag, '#fff', vento === 'forte' ? '#0a6ea0' : '#00353b')
 
-		// vento no sentido do COMPRIMENTO (A->B) — apenas médio/forte
+		// vento no sentido do COMPRIMENTO do conjunto (F0->F1) — apenas médio/forte
 		if (enc.arrows > 0) {
-			const dir = norm({ x: P[1].x - P[0].x, y: P[1].y - P[0].y })
+			const dir = norm({ x: F[1].x - F[0].x, y: F[1].y - F[0].y })
 			const ang = Math.atan2(dir.y, dir.x) * 180 / Math.PI
-			const dist = Math.hypot(P[1].x - P[0].x, P[1].y - P[0].y) * 1.15
+			const dist = Math.hypot(F[1].x - F[0].x, F[1].y - F[0].y) * 1.15
 			for (let i = 0; i < enc.arrows; i++) {
 				const frac = (i + 1) / (enc.arrows + 1)
-				const q = iso(0.02 * L, W * frac, 0, s)
+				const q = iso(0.02 * totalL, maxW * frac, 0, s)
 				const sx = q.px + ox, sy = q.py + oy - 14
 				const wrap = el('g', { transform: `translate(${sx.toFixed(1)} ${sy.toFixed(1)}) rotate(${ang.toFixed(1)})` })
 				const arw = el('path', { d: 'M0,0 h32 M26,-4 l6,4 -6,4', fill: 'none', stroke: '#afe327', 'stroke-opacity': .95, 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, 'pv-wind')
@@ -260,10 +298,20 @@ export class PoolViz {
 			}
 		}
 
-		// cotas
-		this._measure(P[0], P[1], 20, { x: 0, y: -1 }, 'C ' + this._nf(L) + ' m')
-		this._measure(P[0], P[3], 20, { x: 0, y: -1 }, 'L ' + this._nf(W) + ' m')
-		this._measure(P[1], P[5], 22, { x: 1, y: 0 }, 'P ' + this._nf(H) + ' m')
+		// rótulos dos setores adicionais (Área 2, 3…) sobre a superfície
+		if (multi) {
+			boxes.forEach(b => {
+				if (b.i === 0) return
+				const c = pt(b.X0 + b.L / 2, b.W * 0.6, 0)
+				this._chip(c.x, c.y, 'Área ' + (b.i + 1), b.pra ? '#1c7a72' : '#00353b', '#fff')
+			})
+		}
+
+		// cotas da Área 1 (com rótulo explícito quando há mais setores)
+		const tag = multi ? ' (Área 1)' : ''
+		this._measure(P0[0], P0[1], 20, { x: 0, y: -1 }, 'C ' + this._nf(L) + ' m' + tag)
+		this._measure(P0[0], P0[3], 20, { x: 0, y: -1 }, 'L ' + this._nf(W) + ' m')
+		this._measure(P0[1], P0[5], 22, { x: 1, y: 0 }, 'P ' + this._nf(H) + ' m')
 	}
 
 	_nf(n) { return n.toFixed(1).replace('.', ',') }
