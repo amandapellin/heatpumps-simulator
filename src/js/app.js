@@ -2,6 +2,7 @@ import logoEcopool from "../assets/images/logo-ecopool.png"
 import { ScreenDimensionamento } from "./components/screen-dimensionamento.js"
 import { StepResult } from "./components/step-result.js"
 import { ApiService } from "./api.js"
+import { WHATSAPP_URL } from "./config.js"
 import { createIcons, icons } from '../main.js'
 
 /**
@@ -52,9 +53,9 @@ export class App {
 							<h3 class="dim-footer-title">Interessado em adquirir uma bomba de calor?</h3>
 							<p>Entre em contato com a revenda mais próxima e receba um orçamento personalizado.</p>
 						</div>
-						<button class="eco-btn eco-btn-tertiary" id="btnContactRevenda">
+						<a class="eco-btn eco-btn-tertiary" id="btnContactRevenda" href="${WHATSAPP_URL}" target="_blank" rel="noopener">
 							<i data-lucide="message-circle-more"></i> Contatar Revenda
-						</button>
+						</a>
 					</div>
 				</footer>
 			</div>`

@@ -2,9 +2,13 @@ import '../../css/screen-dimensionamento.css'
 import { createIcons, icons } from '../../main.js'
 import { showToast } from '../toast.js'
 import { PoolViz } from './pool-viz.js'
+import { WHATSAPP_URL, MAX_POOL_VOLUME_LITERS } from '../config.js'
 
 // Espelha App\Utils\Constants::PRAINHA_DEPTH no backend.
 const PRAINHA_DEPTH = 0.6
+
+// Limite em m³ (150.000 L). Espelha App\Utils\Constants::POOL_MAX_VOLUME_M3.
+const MAX_POOL_VOLUME_M3 = MAX_POOL_VOLUME_LITERS / 1000
 
 const VENTO_LABEL = {
 	sem_vento: 'Ambiente fechado',
@@ -210,6 +214,34 @@ export class ScreenDimensionamento {
 		if (tipoEl) tipoEl.textContent = this._isPrainhaDepth(prim.profundidade) ? 'Prainha' : 'Piscina'
 
 		this._renderLegend()
+		this._updateLargePoolNotice()
+	}
+
+	// Volume total de água (todas as áreas, inclusive prainha) em m³.
+	_totalVolumeM3() {
+		return this.areas.reduce((sum, a) => {
+			const c = parseFloat(a.comprimento) || 0
+			const l = parseFloat(a.largura) || 0
+			const p = parseFloat(a.profundidade) || 0
+			return sum + c * l * p
+		}, 0)
+	}
+
+	_isLargePool() {
+		return this._totalVolumeM3() > MAX_POOL_VOLUME_M3
+	}
+
+	// Mostra a nota de grande porte e desabilita o botão de simular quando o
+	// volume ultrapassa o limite; caso contrário, restaura o estado normal.
+	_updateLargePoolNotice() {
+		const notice = document.querySelector('#largePoolNotice')
+		const btn = document.querySelector('#btnCalcular')
+		const oversized = this._isLargePool()
+		if (notice) {
+			notice.hidden = !oversized
+			if (oversized) setTimeout(() => createIcons({ icons }), 0)
+		}
+		if (btn) btn.disabled = oversized
 	}
 
 	_setMetric(id, val, unit) {
@@ -238,6 +270,16 @@ export class ScreenDimensionamento {
 				<div class="dim-head">
 					<h2 class="dim-title">Dados da piscina</h2>
 					<p class="dim-subtitle">Preencha os parâmetros — a visualização atualiza em tempo real.</p>
+				</div>
+				<div class="dim-large-notice" id="largePoolNotice" hidden>
+					<i data-lucide="triangle-alert"></i>
+					<div class="dim-large-notice-body">
+						<strong>Piscina de grande porte</strong>
+						<p>Piscinas com volume acima de 150.000 L não são dimensionadas pelo simulador. Fale com um representante comercial ou com a Ecologic para um projeto sob medida.</p>
+					</div>
+					<a class="eco-btn eco-btn-primary eco-btn-medium dim-wa-btn" href="${WHATSAPP_URL}" target="_blank" rel="noopener">
+						<i data-lucide="message-circle-more"></i> Falar no WhatsApp
+					</a>
 				</div>
 				<div class="dim-grid">
 					<div class="dim-col">
@@ -271,7 +313,7 @@ export class ScreenDimensionamento {
 									<div class="eco-form-group"><label class="eco-label" for="temperaturaDesejada">Temp. desejada (°C)</label>
 										<input type="number" id="temperaturaDesejada" class="eco-input" value="32" min="20" step="0.5"></div>
 									<div class="eco-form-group"><label class="eco-label" for="temperaturaInicial">Temp. média inicial (°C)</label>
-										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="0" step="0.5"></div>
+										<input type="number" id="temperaturaInicial" class="eco-input" value="20" min="10" max="30" step="0.5"></div>
 									<div class="eco-form-group"><label class="eco-label" for="tipoUtilizacao">Tipo de utilização</label>
 										<select id="tipoUtilizacao" class="eco-select"><option value="privada">Privada</option><option value="coletiva">Coletiva</option></select></div>
 									<div class="eco-form-group"><label class="eco-label" for="utilizacaoAnual">Utilização anual</label>
@@ -378,6 +420,12 @@ export class ScreenDimensionamento {
 		}
 		if (parseFloat(this.data.temperaturaDesejada) <= parseFloat(this.data.temperaturaInicial)) {
 			showToast('A temperatura desejada deve ser maior que a temperatura inicial.', 'warning'); return
+		}
+		if (this._isLargePool()) {
+			this._updateLargePoolNotice()
+			showToast('Piscinas acima de 150.000 L não podem ser simuladas. Fale com um representante.', 'warning')
+			document.querySelector('#largePoolNotice')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+			return
 		}
 		this.data.areas = this.areas.map(a => ({
 			comprimento: parseFloat(a.comprimento), largura: parseFloat(a.largura), profundidade: parseFloat(a.profundidade),

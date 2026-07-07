@@ -280,15 +280,14 @@ export class StepResult {
 			comparison.heatPumpHot.annual,
 			comparison.heatPumpCold.annual,
 			comparison.eletrica.annual,
-			comparison.gn.annual,
-			comparison.pellet.annual,
+			comparison.glp.annual,
 		]
 
 		const monthlyAvgData = annualData.map(v => parseFloat((v / 12).toFixed(2)))
 		this.chart = new Chart(ctx, {
 			type: 'bar',
 			data: {
-				labels: [hotLabel, coldLabel, 'Resistência', 'Gás Natural', 'Pellet'],
+				labels: [hotLabel, coldLabel, 'Resistência', 'Gás GLP'],
 				datasets: [
 					{
 						label: 'Custo Anual',
@@ -368,16 +367,16 @@ export class StepResult {
 		}
 
 		const comp = this.results.comparison
-		const gnSavings = comp.gn.savings || 0
-		const gnAnnual = comp.gn.annual || 1
-		const savingsPercent = Math.round((gnSavings / gnAnnual) * 100)
-		const monthlySavings = gnSavings / 12
+		const glpSavings = comp.glp.savings || 0
+		const glpAnnual = comp.glp.annual || 1
+		const savingsPercent = Math.round((glpSavings / glpAnnual) * 100)
+		const monthlySavings = glpSavings / 12
 
 		const fmtBRL = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 		return `
 			<div class="eco-results-chart-item">
-				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás Natural</span>
+				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás GLP</span>
 				<i data-lucide="zap" class="eco-result-chart-icon"></i>
 				<div>
 					<p class="eco-result-text">Economia mensal média</p>
@@ -385,11 +384,11 @@ export class StepResult {
 				</div>
 			</div>
 			<div class="eco-results-chart-item">
-				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás Natural</span>
+				<span class="eco-results-chart-item-tooltip">Economia em relação ao uso de Gás GLP</span>
 				<i data-lucide="trending-down" class="eco-result-chart-icon"></i>
 				<div>
 					<p class="eco-result-text">Economia anual</p>
-					<p class="eco-result-text-value">R$ ${fmtBRL(gnSavings)} (${savingsPercent}%)</p>
+					<p class="eco-result-text-value">R$ ${fmtBRL(glpSavings)} (${savingsPercent}%)</p>
 				</div>
 			</div>
 		`
@@ -453,19 +452,9 @@ export class StepResult {
 						fill: false
 					},
 					{
-						label: 'Gás Natural',
-						data: comparison.gn.monthlyBreakdown,
+						label: 'Gás GLP',
+						data: comparison.glp.monthlyBreakdown,
 						borderColor: '#7B1FA2',
-						borderWidth: 2.5,
-						pointRadius: 0,
-						pointHoverRadius: 5,
-						tension: 0.4,
-						fill: false
-					},
-					{
-						label: 'Pellet',
-						data: comparison.pellet.monthlyBreakdown,
-						borderColor: '#F9A825',
 						borderWidth: 2.5,
 						pointRadius: 0,
 						pointHoverRadius: 5,

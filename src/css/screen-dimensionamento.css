@@ -46,6 +46,29 @@
 }
 .dim-subtitle { color: var(--verde-medio, #004d56); font-size: 0.95rem; }
 
+/* aviso de piscina de grande porte (> 150.000 L) */
+.dim-large-notice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 16px 18px;
+    background: #fff8ec;
+    border: 1px solid #f4d79a;
+    border-left: 5px solid #e6a417;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(20, 20, 43, 0.05), 0 14px 30px -24px rgba(0, 53, 59, 0.33);
+}
+.dim-large-notice > svg { width: 26px; height: 26px; flex: 0 0 auto; color: #c47f00; }
+.dim-large-notice-body { flex: 1 1 auto; min-width: 0; }
+.dim-large-notice-body strong { display: block; color: var(--verde-escuro, #00353b); font-size: 0.98rem; margin-bottom: 2px; }
+.dim-large-notice-body p { margin: 0; color: var(--cinza-escuro, #666); font-size: 0.86rem; line-height: 1.4; }
+.dim-large-notice .dim-wa-btn { width: auto; flex: 0 0 auto; white-space: nowrap; text-decoration: none; }
+@media (max-width: 640px) {
+    .dim-large-notice { flex-direction: column; align-items: flex-start; }
+    .dim-large-notice .dim-wa-btn { width: 100%; justify-content: center; }
+}
+
 .dim-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
