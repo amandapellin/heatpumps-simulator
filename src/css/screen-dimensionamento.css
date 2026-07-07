@@ -46,7 +46,9 @@
 }
 .dim-subtitle { color: var(--verde-medio, #004d56); font-size: 0.95rem; }
 
-/* aviso de piscina de grande porte (> 150.000 L) */
+/* aviso de piscina de grande porte (> 150.000 L) — só aparece quando o volume
+   ultrapassa o limite (o atributo [hidden] precisa vencer o display:flex). */
+.dim-large-notice[hidden] { display: none; }
 .dim-large-notice {
     display: flex;
     align-items: center;
