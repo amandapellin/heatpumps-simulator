@@ -226,8 +226,14 @@ export class ScreenDimensionamento {
 		this._setMetric('dimVol', nf(m.volume), 'm³')
 		this._setMetric('dimArea', nf(m.area), 'm²')
 		this._setMetric('dimDelta', Math.round(m.deltaT), '°C')
-		const tipoEl = document.querySelector('#dimTipo')
-		if (tipoEl) tipoEl.textContent = this._isPrainhaDepth(prim.profundidade) ? 'Prainha' : 'Piscina'
+
+		// Volume da prainha só aparece quando há alguma área rasa (≤ 0,6 m).
+		const box = document.querySelector('#dimMetrics')
+		const prainhaMetric = document.querySelector('#dimPrainhaMetric')
+		const hasPrainha = m.prainhaVolume > 0
+		if (hasPrainha) this._setMetric('dimVolPrainha', nf(m.prainhaVolume), 'm³')
+		if (prainhaMetric) prainhaMetric.hidden = !hasPrainha
+		if (box) box.classList.toggle('has-prainha', hasPrainha)
 
 		this._renderLegend()
 		this._updateLargePoolNotice()
@@ -374,11 +380,11 @@ export class ScreenDimensionamento {
 							</div>
 							<div class="dim-stage" id="poolVizMount"></div>
 							<div class="dim-legend" id="dimLegend"></div>
-							<div class="dim-metrics">
-								<div class="dim-metric"><div class="v" id="dimVol">—</div><div class="k">Volume</div></div>
+							<div class="dim-metrics" id="dimMetrics">
+								<div class="dim-metric"><div class="v" id="dimVol">—</div><div class="k">Volume piscina</div></div>
+								<div class="dim-metric" id="dimPrainhaMetric" hidden><div class="v" id="dimVolPrainha">—</div><div class="k">Volume prainha</div></div>
 								<div class="dim-metric"><div class="v" id="dimArea">—</div><div class="k">Área</div></div>
 								<div class="dim-metric"><div class="v" id="dimDelta">—</div><div class="k">Diferença Temp.</div></div>
-								<div class="dim-metric"><div class="v" id="dimTipo">—</div><div class="k">Classificação</div></div>
 							</div>
 							<div class="dim-viz-actions">
 								<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnCalcular">Ver resultados →</button>

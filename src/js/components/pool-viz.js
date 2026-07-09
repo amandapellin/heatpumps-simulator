@@ -61,14 +61,15 @@ export class PoolViz {
 	 * como no dimensionamento).
 	 */
 	static metrics(areas = [], tDes = 0, tIni = 0) {
-		let volume = 0, area = 0
+		let volume = 0, area = 0, prainhaVolume = 0
 		areas.forEach(a => {
 			const c = parseFloat(a.comprimento) || 0
 			const l = parseFloat(a.largura) || 0
 			const p = parseFloat(a.profundidade) || 0
 			if (p > PRAINHA_DEPTH) { volume += c * l * p; area += c * l }
+			else if (p > 0) { prainhaVolume += c * l * p }
 		})
-		return { volume, area, deltaT: Math.max(0, (parseFloat(tDes) || 0) - (parseFloat(tIni) || 0)) }
+		return { volume, area, prainhaVolume, deltaT: Math.max(0, (parseFloat(tDes) || 0) - (parseFloat(tIni) || 0)) }
 	}
 
 	update(state = {}) {
