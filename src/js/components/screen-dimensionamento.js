@@ -297,7 +297,7 @@ export class ScreenDimensionamento {
 					<i data-lucide="triangle-alert"></i>
 					<div class="dim-large-notice-body">
 						<strong>Piscina de grande porte</strong>
-						<p>Piscinas com volume acima de 150.000 L não são dimensionadas pelo simulador. Fale com um representante comercial ou com a Ecologic para um projeto sob medida.</p>
+						<p>Piscinas com volume acima de 150.000 L não são dimensionadas pelo simulador. Entre em contato com a Ecologic para um projeto sob medida.</p>
 					</div>
 					<a class="eco-btn eco-btn-primary eco-btn-medium dim-wa-btn" href="${WHATSAPP_URL}" target="_blank" rel="noopener">
 						<i data-lucide="message-circle-more"></i> Falar no WhatsApp
