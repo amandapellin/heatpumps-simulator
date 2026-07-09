@@ -317,6 +317,12 @@
     margin-top: 18px;
     flex-wrap: wrap;
 }
+/* grupo à direita: Nova Simulação + Baixar Resultados */
+.dim-results-actions-right {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
 /* rodapé de página (largura total) */
 .dim-page-footer {

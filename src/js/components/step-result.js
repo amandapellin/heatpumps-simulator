@@ -239,9 +239,14 @@ export class StepResult {
 
 				<div class="dim-results-actions">
 					<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnBackPool">← Voltar</button>
-					<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnDownload">
-						<i data-lucide="download-cloud"></i> Baixar Resultados
-					</button>
+					<div class="dim-results-actions-right">
+						<button class="eco-btn eco-btn-secondary eco-btn-medium" id="btnNewSimulation">
+							<i data-lucide="refresh-cw"></i> Nova Simulação
+						</button>
+						<button class="eco-btn eco-btn-primary eco-btn-medium" id="btnDownload">
+							<i data-lucide="download-cloud"></i> Baixar Resultados
+						</button>
+					</div>
 				</div>
 			</div>
 		`
@@ -249,6 +254,7 @@ export class StepResult {
 
 	bindEvents(onReset, onBack) {
 		document.querySelector('#btnBackPool')?.addEventListener('click', () => onBack())
+		document.querySelector('#btnNewSimulation')?.addEventListener('click', () => onReset())
 
 		const btnDownload = document.querySelector('#btnDownload')
 		btnDownload?.addEventListener('click', async () => {
