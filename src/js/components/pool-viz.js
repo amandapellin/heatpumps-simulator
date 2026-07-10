@@ -144,10 +144,20 @@ export class PoolViz {
 			let place = null
 			if (i > 0) {
 				const cands = []
+				// Encaixe em uma ÁREA individual (lado com dimensão coincidente).
 				boxes.forEach(anchor => {
 					if (Math.abs(a.W - anchor.W) < EPS) cands.push({ X0: anchor.X0 + anchor.L, Y0: anchor.Y0, L: a.L, W: a.W })
 					if (Math.abs(a.L - anchor.L) < EPS) cands.push({ X0: anchor.X0, Y0: anchor.Y0 + anchor.W, L: a.L, W: a.W })
 				})
+				// Encaixe ao longo de uma ARESTA INTEIRA do conjunto: quando o
+				// comprimento (ou a largura) da nova área cobre todo o vão do
+				// conjunto, ela corre na frente (ou à direita) cobrindo várias áreas
+				// (ex.: prainha de 14 m na frente de duas áreas de 8 e 6 m).
+				const BX = Math.max(...boxes.map(b => b.X0 + b.L))
+				const BY = Math.max(...boxes.map(b => b.Y0 + b.W))
+				if (Math.abs(a.L - BX) < EPS) cands.push({ X0: 0, Y0: BY, L: a.L, W: a.W })
+				if (Math.abs(a.W - BY) < EPS) cands.push({ X0: BX, Y0: 0, L: a.L, W: a.W })
+
 				let bestScore = Infinity
 				cands.forEach(c => {
 					if (overlaps(c)) return
