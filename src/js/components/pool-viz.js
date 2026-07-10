@@ -173,9 +173,24 @@ export class PoolViz {
 						|| (Math.abs(score - bestScore) <= EPS && isEdge && !bestEdge)
 					if (better) { bestScore = score; bestEdge = isEdge; place = c }
 				})
+
+				// ÚLTIMO RECURSO (nenhuma dimensão coincidiu): corre na FRENTE ou à
+				// DIREITA de todo o conjunto, o que for mais compacto — assim uma
+				// prainha "quase do tamanho" vai para a frente em vez de esticar
+				// sempre para o lado.
+				if (!place) {
+					let fbScore = Infinity
+					;[{ X0: 0, Y0: BY, L: a.L, W: a.W }, { X0: BX, Y0: 0, L: a.L, W: a.W }].forEach(c => {
+						if (overlaps(c)) return
+						const maxX = Math.max(c.X0 + c.L, ...boxes.map(b => b.X0 + b.L))
+						const maxY = Math.max(c.Y0 + c.W, ...boxes.map(b => b.Y0 + b.W))
+						const score = maxX + maxY
+						if (score < fbScore - EPS) { fbScore = score; place = c }
+					})
+				}
 			}
 			if (!place) {
-				// 1ª área, ou sem encaixe compartilhado livre: à direita de tudo.
+				// 1ª área (conjunto vazio): na origem.
 				const maxX = boxes.length ? Math.max(...boxes.map(b => b.X0 + b.L)) : 0
 				place = { X0: maxX, Y0: 0 }
 			}
