@@ -158,15 +158,16 @@ export class PoolViz {
 				if (Math.abs(a.L - BX) < EPS) cands.push({ X0: 0, Y0: BY, L: a.L, W: a.W, edge: true })
 				if (Math.abs(a.W - BY) < EPS) cands.push({ X0: BX, Y0: 0, L: a.L, W: a.W, edge: true })
 
-				// Escolhe o encaixe mais compacto (menor bounding box); em EMPATE de
-				// compactação, a aresta inteira tem prioridade sobre o encaixe em área
-				// individual (a área corre pela borda em vez de esticar a ponta).
+				// Escolhe o encaixe mais compacto — por SEMIPERÍMETRO (largura + altura
+				// da caixa), que penaliza formatos compridos e finos e favorece
+				// arranjos equilibrados (evita "esticar a fileira"). Em EMPATE, a
+				// aresta inteira tem prioridade sobre o encaixe em área individual.
 				let bestScore = Infinity, bestEdge = false
 				cands.forEach(c => {
 					if (overlaps(c)) return
 					const maxX = Math.max(c.X0 + c.L, ...boxes.map(b => b.X0 + b.L))
 					const maxY = Math.max(c.Y0 + c.W, ...boxes.map(b => b.Y0 + b.W))
-					const score = maxX * maxY
+					const score = maxX + maxY
 					const isEdge = c.edge === true
 					const better = score < bestScore - EPS
 						|| (Math.abs(score - bestScore) <= EPS && isEdge && !bestEdge)
