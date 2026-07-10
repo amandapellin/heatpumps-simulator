@@ -125,26 +125,44 @@ export class PoolViz {
 		scene.textContent = ''
 		const ox0 = this.VBW, oy0 = this.VBH
 
-		// Cada setor se encosta ao ANTERIOR pela lateral cuja dimensão coincide:
-		//  - mesma largura  -> encaixa ao longo do COMPRIMENTO (eixo x);
-		//  - mesmo comprimento -> encaixa ao longo da LARGURA (eixo y), formando um L;
-		//  - nenhuma dimensão igual -> qualquer lado (segue no comprimento).
+		// Cada setor se encosta a QUALQUER área já posicionada com a qual compartilhe
+		// uma dimensão, no lado que estiver livre — não só à anterior. Assim a Área 3
+		// pode grudar na Área 1 (e não na 2) quando esse for o encaixe possível.
+		//  - mesma largura      -> encaixa ao longo do COMPRIMENTO (eixo x);
+		//  - mesmo comprimento  -> encaixa ao longo da LARGURA (eixo y), formando um L.
+		// Entre os encaixes válidos (sem sobrepor), escolhe o mais compacto (menor
+		// bounding box); empate prioriza a área de menor índice (1ª) e o eixo x.
 		// Superfície da água em z=0; profundidades (H) distintas por área.
 		const EPS = 1e-3
 		const boxes = []
+		const overlaps = (c) => boxes.some(b => {
+			const ox = Math.min(c.X0 + c.L, b.X0 + b.L) - Math.max(c.X0, b.X0)
+			const oy = Math.min(c.Y0 + c.W, b.Y0 + b.W) - Math.max(c.Y0, b.Y0)
+			return ox > EPS && oy > EPS
+		})
 		areas.forEach((a, i) => {
-			let X0 = 0, Y0 = 0
+			let place = null
 			if (i > 0) {
-				const prev = boxes[i - 1]
-				if (Math.abs(a.W - prev.W) < EPS) {          // mesma largura -> ao longo do comprimento
-					X0 = prev.X0 + prev.L; Y0 = prev.Y0
-				} else if (Math.abs(a.L - prev.L) < EPS) {   // mesmo comprimento -> ao longo da largura
-					X0 = prev.X0; Y0 = prev.Y0 + prev.W
-				} else {                                     // sem dimensão igual -> segue no comprimento
-					X0 = prev.X0 + prev.L; Y0 = prev.Y0
-				}
+				const cands = []
+				boxes.forEach(anchor => {
+					if (Math.abs(a.W - anchor.W) < EPS) cands.push({ X0: anchor.X0 + anchor.L, Y0: anchor.Y0, L: a.L, W: a.W })
+					if (Math.abs(a.L - anchor.L) < EPS) cands.push({ X0: anchor.X0, Y0: anchor.Y0 + anchor.W, L: a.L, W: a.W })
+				})
+				let bestScore = Infinity
+				cands.forEach(c => {
+					if (overlaps(c)) return
+					const maxX = Math.max(c.X0 + c.L, ...boxes.map(b => b.X0 + b.L))
+					const maxY = Math.max(c.Y0 + c.W, ...boxes.map(b => b.Y0 + b.W))
+					const score = maxX * maxY
+					if (score < bestScore - EPS) { bestScore = score; place = c }
+				})
 			}
-			boxes.push({ i, X0, Y0, L: a.L, W: a.W, H: a.H, pra: a.H <= PRAINHA_DEPTH && a.H > 0 })
+			if (!place) {
+				// 1ª área, ou sem encaixe compartilhado livre: à direita de tudo.
+				const maxX = boxes.length ? Math.max(...boxes.map(b => b.X0 + b.L)) : 0
+				place = { X0: maxX, Y0: 0 }
+			}
+			boxes.push({ i, X0: place.X0, Y0: place.Y0, L: a.L, W: a.W, H: a.H, pra: a.H <= PRAINHA_DEPTH && a.H > 0 })
 		})
 		const totalL = Math.max(...boxes.map(b => b.X0 + b.L)) || 0.1
 		const maxW = Math.max(...boxes.map(b => b.Y0 + b.W)) || 0.1
