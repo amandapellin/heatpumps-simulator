@@ -155,16 +155,22 @@ export class PoolViz {
 				// (ex.: prainha de 14 m na frente de duas áreas de 8 e 6 m).
 				const BX = Math.max(...boxes.map(b => b.X0 + b.L))
 				const BY = Math.max(...boxes.map(b => b.Y0 + b.W))
-				if (Math.abs(a.L - BX) < EPS) cands.push({ X0: 0, Y0: BY, L: a.L, W: a.W })
-				if (Math.abs(a.W - BY) < EPS) cands.push({ X0: BX, Y0: 0, L: a.L, W: a.W })
+				if (Math.abs(a.L - BX) < EPS) cands.push({ X0: 0, Y0: BY, L: a.L, W: a.W, edge: true })
+				if (Math.abs(a.W - BY) < EPS) cands.push({ X0: BX, Y0: 0, L: a.L, W: a.W, edge: true })
 
-				let bestScore = Infinity
+				// Escolhe o encaixe mais compacto (menor bounding box); em EMPATE de
+				// compactação, a aresta inteira tem prioridade sobre o encaixe em área
+				// individual (a área corre pela borda em vez de esticar a ponta).
+				let bestScore = Infinity, bestEdge = false
 				cands.forEach(c => {
 					if (overlaps(c)) return
 					const maxX = Math.max(c.X0 + c.L, ...boxes.map(b => b.X0 + b.L))
 					const maxY = Math.max(c.Y0 + c.W, ...boxes.map(b => b.Y0 + b.W))
 					const score = maxX * maxY
-					if (score < bestScore - EPS) { bestScore = score; place = c }
+					const isEdge = c.edge === true
+					const better = score < bestScore - EPS
+						|| (Math.abs(score - bestScore) <= EPS && isEdge && !bestEdge)
+					if (better) { bestScore = score; bestEdge = isEdge; place = c }
 				})
 			}
 			if (!place) {
